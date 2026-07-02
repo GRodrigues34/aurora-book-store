@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: aurora-bookstore
+  # mysql config
+  datasource:
+    url: jdbc:mysql://localhost:3306/aurora_db?allowPublicKeyRetrieval=true&useSSL=false
+        # conection protocol/Mysql address and port/database name/safety parameters
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver #java class used for sql translation
+
+  # jpa/hibernate config
+  jpa:
+    hibernate:
+      ddl-auto: validate # hibernate see if the tables are exactly the model entities
+    show-sql: true # show sql in the terminal
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Ai config
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.1
+    vectorstore:
+      chroma:
+        client:
+          host: http://localhost
+          port: 8000
