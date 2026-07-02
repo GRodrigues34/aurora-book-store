@@ -1,4 +1,3 @@
-# aurora-book-store
 # Aurora Book Store
 
 ## About the Project
