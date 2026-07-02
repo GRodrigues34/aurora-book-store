@@ -1,4 +1,4 @@
-package com.github.gr.aurora_bookstore.model;
+package com.github.gr.aurora_bookstore.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
