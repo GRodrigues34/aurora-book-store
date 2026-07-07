@@ -1,0 +1,7 @@
+spring:
+  docker:
+    compose:
+      start:
+        services:
+          - mysql
+          - chroma

@@ -6,7 +6,7 @@ services:
       MYSQL_DATABASE: aurora_db
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
@@ -23,6 +23,8 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: aurora_ollama
+    profiles:
+      - "disabled"
     ports:
       - "11434:11434"
     volumes:

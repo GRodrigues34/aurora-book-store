@@ -1,9 +1,12 @@
 spring:
   application:
     name: aurora-bookstore
+  docker:
+    compose:
+      file: ../docker-compose.yml
   # mysql config
   datasource:
-    url: jdbc:mysql://localhost:3306/aurora_db?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3307/aurora_db?allowPublicKeyRetrieval=true&useSSL=false
         # conection protocol/Mysql address and port/database name/safety parameters
     username: root
     password: root
@@ -27,6 +30,11 @@ spring:
           model: llama3.1
     vectorstore:
       chroma:
+        initialize-schema: true
         client:
           host: http://localhost
           port: 8000
+# COLE AQUI:
+logging:
+  level:
+    org.springframework.web: DEBUG
