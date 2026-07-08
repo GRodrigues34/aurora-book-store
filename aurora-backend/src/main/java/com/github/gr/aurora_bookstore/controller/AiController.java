@@ -17,8 +17,8 @@ public class AiController {
     private final AiService aiService;
 
     @PostMapping("/api/chat")
-    public ResponseEntity<Flux<String>> chat(@RequestBody ChatRequest request){
-        Flux<String> flux = aiService.ProcessUserMessage(request);
+    public ResponseEntity<Flux<String>> chat(@RequestBody ChatRequest request) {
+        Flux<String> flux = aiService.receiveUserMessage(request);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_EVENT_STREAM)
