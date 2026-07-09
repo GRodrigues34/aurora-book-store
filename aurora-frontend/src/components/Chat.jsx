@@ -13,6 +13,28 @@ export default function Chat() {
   };
   useEffect(() => scrollToBottom(), [messages]);
 
+  // Load chat history on component mount
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/chat/history/1');
+        if (response.ok) {
+          const data = await response.json();
+          const mappedMessages = data.map(msg => ({
+            role: msg.chatRole,
+            content: msg.content
+          }));
+          setMessages(mappedMessages);
+        } else {
+          console.error('Erro ao buscar histórico de chat');
+        }
+      } catch (error) {
+        console.error('Falha de conexão ao buscar histórico:', error);
+      }
+    };
+    fetchHistory();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;

@@ -12,12 +12,23 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class AiService {
+
+    @Value("classpath:system-prompt.txt")
+    Resource systemPrompt;
+
+    @Value("classpath:policies.md")
+    Resource policies;
+
     private final ChatClient chatClient;
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
@@ -31,7 +42,17 @@ public class AiService {
     }
 
     public Flux<String> processUserMessage(List<Message> messages) {
-        return chatClient.prompt().messages(messages).stream().content();
+        try {
+            String systemText = systemPrompt.getContentAsString(StandardCharsets.UTF_8);
+
+            return chatClient.prompt()
+                    .system(systemText)
+                    .messages(messages)
+                    .stream()
+                    .content();
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading AI system prompt resource", e);
+        }
     }
 
     public void saveChatMessage(String message, Long userId, String chatRole) {
