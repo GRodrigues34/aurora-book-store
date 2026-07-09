@@ -28,6 +28,9 @@ spring:
       chat:
         options:
           model: llama3.1
+      embedding:
+        options:
+          model: nomic-embed-text
     vectorstore:
       chroma:
         initialize-schema: true

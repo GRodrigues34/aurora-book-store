@@ -12,6 +12,9 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
@@ -19,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AiService {
@@ -32,21 +36,28 @@ public class AiService {
     private final ChatClient chatClient;
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
+    private final VectorStore vectorStore;
 
     public AiService(ChatClient.Builder chatClientBuilder,
             ChatMessageRepository chatMessageRepository,
-            UserService userService) {
+            UserService userService,
+            VectorStore vectorStore) {
         this.chatClient = chatClientBuilder.build();
         this.chatMessageRepository = chatMessageRepository;
         this.userService = userService;
+        this.vectorStore = vectorStore;
     }
 
-    public Flux<String> processUserMessage(List<Message> messages) {
+    public Flux<String> processUserMessage(List<Message> messages, String context) {
         try {
             String systemText = systemPrompt.getContentAsString(StandardCharsets.UTF_8);
+            String combinedSystemText = systemText;
+            if (context != null && !context.isBlank()) {
+                combinedSystemText = systemText + "\n\nContext from Store Policies:\n" + context;
+            }
 
             return chatClient.prompt()
-                    .system(systemText)
+                    .system(combinedSystemText)
                     .messages(messages)
                     .stream()
                     .content();
@@ -94,11 +105,20 @@ public class AiService {
 
         saveChatMessage(userMessage, userId, "user");
 
+        List<Document> similarDocs = vectorStore.similaritySearch(
+                SearchRequest.builder()
+                        .query(userMessage)
+                        .topK(2)
+                        .build());
+        String context = similarDocs.stream()
+                .map(Document::getText)
+                .collect(Collectors.joining("\n\n"));
+
         List<Message> history = getSpringAiHistory(userId);
 
         StringBuilder fullAiResponse = new StringBuilder();
 
-        return processUserMessage(history)
+        return processUserMessage(history, context)
                 .doOnNext(chunk -> fullAiResponse.append(chunk))
                 .doOnComplete(() -> {
                     saveChatMessage(fullAiResponse.toString(), userId, "ai");
