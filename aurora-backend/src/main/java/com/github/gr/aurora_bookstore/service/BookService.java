@@ -58,6 +58,7 @@ public class BookService {
         existingBook.setDescription(dto.getDescription());
         existingBook.setPrice(dto.getPrice());
         existingBook.setImageUrl(dto.getImageUrl());
+        existingBook.setStock(dto.getStock());
 
         existingBook.setAuthors(resolveAuthors(dto.getAuthorIds()));
         existingBook.setCategories(resolveCategories(dto.getCategoryIds()));

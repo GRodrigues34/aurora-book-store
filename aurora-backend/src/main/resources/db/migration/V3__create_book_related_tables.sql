@@ -3,7 +3,8 @@ CREATE TABLE book(
     title VARCHAR(255) NOT NULL,
     description VARCHAR(500),
     price FLOAT,
-    image_url VARCHAR(255)
+    image_url VARCHAR(255),
+    stock INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE author(

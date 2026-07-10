@@ -15,6 +15,7 @@ public class BookReadDto {
     private String description;
     private Float price;
     private String imageUrl;
+    private Integer stock;
     private Set<AuthorReadDto> authors;
     private Set<CategoryReadDto> categories;
     private Set<GenreReadDto> genres;

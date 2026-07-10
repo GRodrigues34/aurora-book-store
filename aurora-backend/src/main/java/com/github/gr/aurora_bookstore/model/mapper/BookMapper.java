@@ -20,6 +20,7 @@ public class BookMapper {
         dto.setDescription(book.getDescription());
         dto.setPrice(book.getPrice());
         dto.setImageUrl(book.getImageUrl());
+        dto.setStock(book.getStock());
 
         if (book.getAuthors() != null) {
             dto.setAuthors(book.getAuthors().stream()
@@ -49,6 +50,7 @@ public class BookMapper {
                 .description(dto.getDescription())
                 .price(dto.getPrice())
                 .imageUrl(dto.getImageUrl())
+                .stock(dto.getStock())
                 .authors(authors)
                 .categories(categories)
                 .genres(genres)

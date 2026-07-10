@@ -15,6 +15,8 @@ public class BookCreateDto {
     @NotNull(message = "Price is required")
     private Float price;
     private String imageUrl;
+    @NotNull(message = "Stock is required")
+    private Integer stock;
     private Set<Long> authorIds;
     private Set<Long> categoryIds;
     private Set<Long> genreIds;

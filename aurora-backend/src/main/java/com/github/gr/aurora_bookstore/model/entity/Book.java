@@ -31,6 +31,9 @@ public class Book {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(nullable = false)
+    private Integer stock;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "book_author_relationship",

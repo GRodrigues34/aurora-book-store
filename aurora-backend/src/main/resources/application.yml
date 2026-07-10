@@ -40,4 +40,5 @@ spring:
 # COLE AQUI:
 logging:
   level:
-    org.springframework.web: DEBUG
+    org.springframework: INFO
+    com.github.gr.aurora_bookstore: DEBUG
