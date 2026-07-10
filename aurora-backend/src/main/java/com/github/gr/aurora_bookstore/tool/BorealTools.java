@@ -30,7 +30,7 @@ public class BorealTools {
         this.genreRepository = genreRepository;
     }
 
-    @Tool(description = "Description: {Search for books in the bookstore DataBase with a SQL query using: title, category, genre, or author name. The parameter MUST be in English.} Parameter(s): {<String><Key-word for the SQL query>} Return: {<String><Books formatted in the format: '- ID: %d | Title: %s | Price: R$ %.2f | Stock: %d | Description: %s'>}")
+    @Tool(description = "Search books by title, category, genre, or author. Query must be in English.")
     public String searchBooks(String query) {
         log.info("CALLED TOOL SEARCH BOOKS");
         log.info("TOOL SEARCHBOOKS CALLED WITH QUERY='{}'", query);
@@ -81,15 +81,15 @@ public class BorealTools {
         return "No books found matching: " + query;
     }
 
-    @Tool(description = "Description: {Get the list of all available search keywords, categories, and genres in the bookstore catalog.} Parameter(s): {None} Return: {<String><Available Categories and Genres listed as: 'Available Categories: ... \\nAvailable Genres: ...'>}")
-    public String searchKeywords() {
-        log.info("CALLED TOOL SEARCH KEYWORDS");
+    @Tool(description = "List all available categories and genres in the catalog.")
+    public String searchCategoriesAndGenres() {
+        log.info("CALLED TOOL SEARCH CATEGORIES AND GENRES");
         String categories = listCategories();
         String genres = listGenres();
         return "Available Categories: " + categories + "\nAvailable Genres: " + genres;
     }
 
-    @Tool(description = "Description: {Get all books in the catalog. Call only when the user needs all the books.} Parameter(s): {None} Return: {<String><Books formatted in the format: '- ID: %d | Title: %s | Price: R$ %.2f | Stock: %d | Description: %s'>}")
+    @Tool(description = "List all books in the catalog.")
     public String getAllBooks() {
         log.info("CALLED TOOL GET ALL BOOKS");
         List<Book> books = bookRepository.findAll();
@@ -177,7 +177,8 @@ public class BorealTools {
         if (query == null) {
             return "";
         }
-        // Remove prefix like "genre:", "author:", "title:", "name:" (with optional colon or space) at the start of the query
+        // Remove prefix like "genre:", "author:", "title:", "name:" (with optional
+        // colon or space) at the start of the query
         String cleaned = query.replaceAll("(?i)^(title|genre|author|name)\\s*[:\\s]\\s*", "");
         // Strip leading/trailing single/double quotes if the LLM wrapped it
         cleaned = cleaned.replaceAll("^['\"]|['\"]$", "");

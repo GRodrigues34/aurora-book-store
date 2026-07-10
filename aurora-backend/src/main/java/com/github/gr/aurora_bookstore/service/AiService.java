@@ -121,6 +121,7 @@ public class AiService {
                 SearchRequest.builder()
                         .query(userMessage)
                         .topK(2)
+                        .similarityThreshold(0.6)
                         .build());
         log.info("SIMILAR DOCS FOUND: {}", similarDocs);
 
