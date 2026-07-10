@@ -1,11 +1,13 @@
 package com.github.gr.aurora_bookstore.tool;
 
+import com.github.gr.aurora_bookstore.model.entity.Author;
 import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.Category;
 import com.github.gr.aurora_bookstore.model.entity.Genre;
 import com.github.gr.aurora_bookstore.repository.BookRepository;
 import com.github.gr.aurora_bookstore.repository.CategoryRepository;
 import com.github.gr.aurora_bookstore.repository.GenreRepository;
+import com.github.gr.aurora_bookstore.repository.AuthorRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
@@ -21,13 +23,16 @@ public class BorealTools {
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
     private final GenreRepository genreRepository;
+    private final AuthorRepository authorRepository;
 
     public BorealTools(BookRepository bookRepository,
             CategoryRepository categoryRepository,
-            GenreRepository genreRepository) {
+            GenreRepository genreRepository,
+            AuthorRepository authorRepository) {
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
         this.genreRepository = genreRepository;
+        this.authorRepository = authorRepository;
     }
 
     @Tool(description = "Search books by title, category, genre, or author. Query must be in English.")
@@ -82,11 +87,13 @@ public class BorealTools {
     }
 
     @Tool(description = "List all available categories and genres in the catalog.")
-    public String searchCategoriesAndGenres() {
+    public String searchCategoriesGenresAndAuthors() {
         log.info("CALLED TOOL SEARCH CATEGORIES AND GENRES");
         String categories = listCategories();
         String genres = listGenres();
-        return "Available Categories: " + categories + "\nAvailable Genres: " + genres;
+        String authors = listAuthors();
+        return "Available Categories: " + categories + "\nAvailable Genres: " + genres + "\nAvailable Authors: "
+                + authors;
     }
 
     @Tool(description = "List all books in the catalog.")
@@ -154,6 +161,17 @@ public class BorealTools {
         }
         return genres.stream()
                 .map(Genre::getName)
+                .collect(Collectors.joining(", "));
+    }
+
+    public String listAuthors() {
+        log.info("CALLED METHOD LIST AUTHORS");
+        List<Author> authors = authorRepository.findAll();
+        if (authors.isEmpty()) {
+            return "No authors found in the catalog.";
+        }
+        return authors.stream()
+                .map(Author::getName)
                 .collect(Collectors.joining(", "));
     }
 
