@@ -19,26 +19,23 @@ spring:
     show-sql: true # show sql in the terminal
     properties:
       hibernate:
-        format_sql: true
+        "[format_sql]": true
 
   # Ai config
   ai:
     ollama:
       base-url: http://localhost:11434
       chat:
-        options:
-          model: llama3.1
+        model: llama3.1
       embedding:
-        options:
-          model: nomic-embed-text
+        model: nomic-embed-text
     vectorstore:
       chroma:
         initialize-schema: true
         client:
           host: http://localhost
           port: 8000
-# COLE AQUI:
 logging:
   level:
-    org.springframework: INFO
-    com.github.gr.aurora_bookstore: DEBUG
+    "[org.springframework]": INFO
+    "[com.github.gr.aurora_bookstore]": DEBUG

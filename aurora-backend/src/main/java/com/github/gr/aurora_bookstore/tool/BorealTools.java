@@ -30,50 +30,19 @@ public class BorealTools {
         this.genreRepository = genreRepository;
     }
 
-    @Tool(description = "Search for books in the bookstore catalog. You can search by title, category, genre, or author name. The query MUST be in English.")
-    public String searchBooks(Object query) {
+    @Tool(description = "Description: {Search for books in the bookstore DataBase with a SQL query using: title, category, genre, or author name. The parameter MUST be in English.} Parameter(s): {<String><Key-word for the SQL query>} Return: {<String><Books formatted in the format: '- ID: %d | Title: %s | Price: R$ %.2f | Stock: %d | Description: %s'>}")
+    public String searchBooks(String query) {
         log.info("CALLED TOOL SEARCH BOOKS");
-        log.info("TOOL SEARCHBOOKS CALLED WITH QUERY CLASS: {}", query != null ? query.getClass().getName() : "null");
         log.info("TOOL SEARCHBOOKS CALLED WITH QUERY='{}'", query);
-        if (query == null) {
+        if (query == null || query.isBlank()) {
             return "Please provide a search query.";
         }
 
-        String searchTerm = "";
-        if (query instanceof String str) {
-            searchTerm = str;
-        } else if (query instanceof java.util.Map<?, ?> map) {
-            Object qVal = map.get("query");
-            if (qVal == null)
-                qVal = map.get("title");
-            if (qVal == null)
-                qVal = map.get("author");
-            if (qVal == null)
-                qVal = map.get("genre");
-            if (qVal == null)
-                qVal = map.get("category");
-
-            if (qVal != null) {
-                if (qVal instanceof java.util.Map<?, ?> nestedMap) {
-                    Object nestedVal = nestedMap.get("title");
-                    if (nestedVal == null)
-                        nestedVal = nestedMap.get("query");
-                    searchTerm = (nestedVal != null) ? nestedVal.toString()
-                            : nestedMap.values().iterator().next().toString();
-                } else {
-                    searchTerm = qVal.toString();
-                }
-            } else {
-                searchTerm = map.values().stream()
-                        .map(Object::toString)
-                        .collect(Collectors.joining(" "));
-            }
-        } else {
-            searchTerm = query.toString();
-        }
+        String cleaned = cleanQuery(query);
+        log.info("CLEANED QUERY='{}'", cleaned);
 
         log.info("NORMALIZING QUERY CALL");
-        String normalized = normalize(searchTerm);
+        String normalized = normalize(cleaned);
         log.info("NORMALIZED QUERY RESULT '{}'", normalized);
 
         if (normalized.isBlank()) {
@@ -81,43 +50,53 @@ public class BorealTools {
         }
 
         // 1. Try search by Title
-        List<Book> books = bookRepository.findByTitleContainingIgnoreCase(normalized);
-        if (!books.isEmpty()) {
-            log.info("FOUND BOOKS BY TITLE SEARCH RESULT '{}'", normalized);
-            return formatBooks(books);
+        String result = searchByTitle(normalized);
+        if (!result.startsWith("No books found")) {
+            log.info("BOOKS FOUND BY TITLE='{}'", normalized);
+            return result;
         }
 
         // 2. Try search by Category
-        books = bookRepository.findByCategoriesNameContainingIgnoreCase(normalized);
-        if (!books.isEmpty()) {
-            log.info("FOUND BOOKS BY CATEGORY SEARCH RESULT '{}'", normalized);
-            return formatBooks(books);
+        result = searchByCategory(normalized);
+        if (!result.startsWith("No books found")) {
+            log.info("BOOKS FOUND BY CATEGORY='{}' USING ANY CRITERIA", normalized);
+            return result;
         }
 
         // 3. Try search by Genre
-        books = bookRepository.findByGenresNameContainingIgnoreCase(normalized);
-        if (!books.isEmpty()) {
-            log.info("FOUND BOOKS BY GENRE SEARCH RESULT '{}'", normalized);
-            return formatBooks(books);
+        result = searchByGenre(normalized);
+        if (!result.startsWith("No books found")) {
+            log.info("BOOKS FOUND BY GENRE='{}' USING ANY CRITERIA", normalized);
+            return result;
         }
 
         // 4. Try search by Author
-        books = bookRepository.findByAuthorsNameContainingIgnoreCase(normalized);
-        if (!books.isEmpty()) {
-            log.info("FOUND BOOKS BY AUTHOR SEARCH RESULT '{}'", normalized);
-            return formatBooks(books);
+        result = searchByAuthor(normalized);
+        if (!result.startsWith("No books found")) {
+            log.info("BOOKS FOUND BY AUTHOR='{}' USING ANY CRITERIA", normalized);
+            return result;
         }
 
         log.info("NO BOOKS FOUND FOR '{}' USING ANY CRITERIA", normalized);
-        return "No books found matching: " + searchTerm;
+        return "No books found matching: " + query;
     }
 
-    @Tool(description = "Get the list of all available search keywords, categories, and genres in the bookstore catalog.")
+    @Tool(description = "Description: {Get the list of all available search keywords, categories, and genres in the bookstore catalog.} Parameter(s): {None} Return: {<String><Available Categories and Genres listed as: 'Available Categories: ... \\nAvailable Genres: ...'>}")
     public String searchKeywords() {
         log.info("CALLED TOOL SEARCH KEYWORDS");
         String categories = listCategories();
         String genres = listGenres();
         return "Available Categories: " + categories + "\nAvailable Genres: " + genres;
+    }
+
+    @Tool(description = "Description: {Get all books in the catalog. Call only when the user needs all the books.} Parameter(s): {None} Return: {<String><Books formatted in the format: '- ID: %d | Title: %s | Price: R$ %.2f | Stock: %d | Description: %s'>}")
+    public String getAllBooks() {
+        log.info("CALLED TOOL GET ALL BOOKS");
+        List<Book> books = bookRepository.findAll();
+        if (books.isEmpty()) {
+            return "No books found in the catalog.";
+        }
+        return formatBooks(books);
     }
 
     public String searchByCategory(String category) {
@@ -192,5 +171,16 @@ public class BorealTools {
                 .map(book -> String.format("- ID: %d | Title: %s | Price: R$ %.2f | Stock: %d | Description: %s",
                         book.getId(), book.getTitle(), book.getPrice(), book.getStock(), book.getDescription()))
                 .collect(Collectors.joining("\n"));
+    }
+
+    private String cleanQuery(String query) {
+        if (query == null) {
+            return "";
+        }
+        // Remove prefix like "genre:", "author:", "title:", "name:" (with optional colon or space) at the start of the query
+        String cleaned = query.replaceAll("(?i)^(title|genre|author|name)\\s*[:\\s]\\s*", "");
+        // Strip leading/trailing single/double quotes if the LLM wrapped it
+        cleaned = cleaned.replaceAll("^['\"]|['\"]$", "");
+        return cleaned.trim();
     }
 }
