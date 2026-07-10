@@ -86,9 +86,9 @@ public class BorealTools {
         return "No books found matching: " + query;
     }
 
-    @Tool(description = "List all available categories and genres in the catalog.")
-    public String searchCategoriesGenresAndAuthors() {
-        log.info("CALLED TOOL SEARCH CATEGORIES AND GENRES");
+    @Tool(description = "Get all available categories and genres in the catalog.")
+    public String getAllCategoriesGenresAndAuthors() {
+        log.info("CALLED TOOL GET ALL CATEGORIES, GENRES AND AUTHORS");
         String categories = listCategories();
         String genres = listGenres();
         String authors = listAuthors();
@@ -96,7 +96,7 @@ public class BorealTools {
                 + authors;
     }
 
-    @Tool(description = "List all books in the catalog.")
+    @Tool(description = "Get all books in the catalog.")
     public String getAllBooks() {
         log.info("CALLED TOOL GET ALL BOOKS");
         List<Book> books = bookRepository.findAll();
