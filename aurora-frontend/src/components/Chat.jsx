@@ -107,8 +107,8 @@ export default function Chat() {
       <div className="bg-white border-b px-6 py-4 flex items-center shadow-sm z-10">
         <Bot className="text-indigo-600 mr-3" size={32} />
         <div>
-          <h1 className="text-xl font-bold text-gray-800 tracking-tight">Aurora AI</h1>
-          <p className="text-xs text-gray-500 font-medium">Seu assistente virtual de livraria</p>
+          <h1 className="text-xl font-bold text-gray-800 tracking-tight">Boreal AI</h1>
+          <p className="text-xs text-gray-500 font-medium">Seu assistente virtual da Aurora Bookstore!</p>
         </div>
       </div>
 

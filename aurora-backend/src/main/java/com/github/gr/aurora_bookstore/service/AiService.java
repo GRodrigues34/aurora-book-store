@@ -120,8 +120,7 @@ public class AiService {
         List<Document> similarDocs = vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query(userMessage)
-                        .topK(2)
-                        .similarityThreshold(0.6)
+                        .topK(5)
                         .build());
         log.info("SIMILAR DOCS FOUND: {}", similarDocs);
 
