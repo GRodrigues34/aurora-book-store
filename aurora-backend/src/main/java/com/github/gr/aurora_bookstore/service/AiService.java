@@ -46,8 +46,8 @@ public class AiService {
             UserService userService,
             VectorStore vectorStore,
             BorealTools borealTools) {
-        // Criamos dois clientes: um apenas para fala/políticas, e outro carregado com
-        // ferramentas.
+        // Create two clients: one strictly for chat/policies, and another loaded with
+        // tools.
         this.baseChatClient = chatClientBuilder.build();
         this.toolsChatClient = chatClientBuilder.defaultTools(borealTools).build();
 
@@ -56,12 +56,12 @@ public class AiService {
         this.vectorStore = vectorStore;
     }
 
-    public Flux<String> processUserMessage(ChatClient client, List<Message> messages, String context) {
+    public Flux<String> processUserMessage(ChatClient client, List<Message> messages, String extraInstructions) {
         try {
             String systemText = systemPrompt.getContentAsString(StandardCharsets.UTF_8);
             String combinedSystemText = systemText;
-            if (context != null && !context.isBlank()) {
-                combinedSystemText = systemText + "\n\nContext from Store Policies:\n" + context;
+            if (extraInstructions != null && !extraInstructions.isBlank()) {
+                combinedSystemText = systemText + "\n\n" + extraInstructions;
             }
 
             return client.prompt()
@@ -85,8 +85,7 @@ public class AiService {
     }
 
     public List<Message> getSpringAiHistory(Long userId) {
-        // Guardrail: Limita o contexto para as últimas 4 mensagens (2 turnos) para
-        // evitar estouro de tokens
+        // Guardrail: Limit the context to the last 4 messages to prevent token overflow
         List<ChatMessage> lastMessages = chatMessageRepository.findTop4ByUserIdOrderByCreatedAtDesc(userId).reversed();
         List<Message> springAiMessages = new ArrayList<>();
 
@@ -129,36 +128,37 @@ public class AiService {
                 lowerMsg.matches(
                         ".*(payment|card|shipping|return|policy|contact|hour|time|rule).*");
 
-        String context = "";
+        String extraInstructions = "";
         ChatClient currentClient;
 
         if (isBookIntent) {
             log.info("ROUTE: BOOKS (RAG OFF, TOOLS ON)");
+            extraInstructions = "[TOOL INSTRUCTIONS]\n- To specificially find books, use the 'searchBooks' tool. if you need all books use getAllBooks() tool, to get all categories, genres and authors, use 'getAllCategoriesGenresAndAuthors' tool. Extract ONLY the exact core keyword translated to English (e.g., use 'fantasy' instead of 'fantasy books'). CRITICAL RULE: You MUST integrate the exact text returned by the tool into your response. If the tool returns a list of categories, genres, or authors, you MUST output that exact list to the user. NEVER say 'we have a variety' without listing the items. When suggesting a book, ALWAYS include its title, price, and stock in your text response.";
             currentClient = toolsChatClient;
         } else if (isPolicyIntent) {
             log.info("ROUTE: POLICIES (RAG ON, TOOLS OFF)");
             List<Document> similarDocs = vectorStore.similaritySearch(
                     SearchRequest.builder().query(userMessage).topK(2).build());
-            context = similarDocs.stream().map(Document::getText).collect(Collectors.joining("\n\n"));
+            String ragContext = similarDocs.stream().map(Document::getText).collect(Collectors.joining("\n\n"));
+            extraInstructions = "[CONTEXT FROM STORE POLICIES]\n" + ragContext;
             currentClient = baseChatClient;
         } else {
             log.info("ROUTE: SMALL TALK (RAG OFF, TOOLS OFF)");
             currentClient = baseChatClient;
         }
-        // --- FIM DO GUARDRAIL ---
+        // END OF GUARDRAIL
 
         List<Message> history = getSpringAiHistory(userId);
 
         StringBuilder fullAiResponse = new StringBuilder();
 
         log.info("SENDING REQUEST TO BOREAL");
-        return processUserMessage(currentClient, history, context)
+        return processUserMessage(currentClient, history, extraInstructions)
                 .doOnNext(chunk -> fullAiResponse.append(chunk))
                 .doOnComplete(() -> {
                     saveChatMessage(fullAiResponse.toString(), userId, "ai");
                 })
-                // GUARDRAIL REATIVO: Se der erro ou retornar vazio, o fluxo é capturado em vez
-                // de falhar
+                // REACTIVE GUARDRAIL: If an error occurs or returns empty, the flow is captured
                 .defaultIfEmpty("Desculpe, tive um lapso de memória! Pode repetir a pergunta?")
                 .onErrorResume(e -> {
                     log.error("Error in AI Stream", e);
