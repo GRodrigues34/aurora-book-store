@@ -35,31 +35,28 @@ public class AiService {
     @Value("classpath:system-prompt.txt")
     Resource systemPrompt;
 
-    @Value("classpath:policies.md")
-    Resource policies;
-
-    private final ChatClient chatClient;
+    private final ChatClient baseChatClient;
+    private final ChatClient toolsChatClient;
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
     private final VectorStore vectorStore;
-
-    private final BorealTools borealTools;
 
     public AiService(ChatClient.Builder chatClientBuilder,
             ChatMessageRepository chatMessageRepository,
             UserService userService,
             VectorStore vectorStore,
             BorealTools borealTools) {
-        this.chatClient = chatClientBuilder
-                .defaultTools(borealTools)
-                .build();
+        // Criamos dois clientes: um apenas para fala/políticas, e outro carregado com
+        // ferramentas.
+        this.baseChatClient = chatClientBuilder.build();
+        this.toolsChatClient = chatClientBuilder.defaultTools(borealTools).build();
+
         this.chatMessageRepository = chatMessageRepository;
         this.userService = userService;
         this.vectorStore = vectorStore;
-        this.borealTools = borealTools;
     }
 
-    public Flux<String> processUserMessage(List<Message> messages, String context) {
+    public Flux<String> processUserMessage(ChatClient client, List<Message> messages, String context) {
         try {
             String systemText = systemPrompt.getContentAsString(StandardCharsets.UTF_8);
             String combinedSystemText = systemText;
@@ -67,7 +64,7 @@ public class AiService {
                 combinedSystemText = systemText + "\n\nContext from Store Policies:\n" + context;
             }
 
-            return chatClient.prompt()
+            return client.prompt()
                     .system(combinedSystemText)
                     .messages(messages)
                     .stream()
@@ -88,7 +85,9 @@ public class AiService {
     }
 
     public List<Message> getSpringAiHistory(Long userId) {
-        List<ChatMessage> lastMessages = chatMessageRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId).reversed();
+        // Guardrail: Limita o contexto para as últimas 4 mensagens (2 turnos) para
+        // evitar estouro de tokens
+        List<ChatMessage> lastMessages = chatMessageRepository.findTop4ByUserIdOrderByCreatedAtDesc(userId).reversed();
         List<Message> springAiMessages = new ArrayList<>();
 
         for (ChatMessage chatMessage : lastMessages) {
@@ -117,28 +116,54 @@ public class AiService {
 
         saveChatMessage(userMessage, userId, "user");
 
-        List<Document> similarDocs = vectorStore.similaritySearch(
-                SearchRequest.builder()
-                        .query(userMessage)
-                        .topK(5)
-                        .build());
-        log.info("SIMILAR DOCS FOUND: {}", similarDocs);
+        // GUARDRAIL
+        String lowerMsg = userMessage.toLowerCase();
+        boolean isBookIntent = lowerMsg.matches(
+                ".*(livro|autor|fantasia|terror|romance|catálogo|catalogo|recomenda|gênero|genero|ficção|título|titulo).*")
+                ||
+                lowerMsg.matches(
+                        ".*(book|author|fantasy|horror|catalog|recommend|genre|fiction|title).*");
+        boolean isPolicyIntent = lowerMsg.matches(
+                ".*(pagamento|pix|boleto|cartão|cartao|frete|devolução|devolucao|prazo|política|politica|contato|horário|horario|regras).*")
+                ||
+                lowerMsg.matches(
+                        ".*(payment|card|shipping|return|policy|contact|hour|time|rule).*");
 
-        String context = similarDocs.stream()
-                .map(Document::getText)
-                .collect(Collectors.joining("\n\n"));
-        log.info("CONTEXT GATHERED: {}", context);
+        String context = "";
+        ChatClient currentClient;
+
+        if (isBookIntent) {
+            log.info("ROUTE: BOOKS (RAG OFF, TOOLS ON)");
+            currentClient = toolsChatClient;
+        } else if (isPolicyIntent) {
+            log.info("ROUTE: POLICIES (RAG ON, TOOLS OFF)");
+            List<Document> similarDocs = vectorStore.similaritySearch(
+                    SearchRequest.builder().query(userMessage).topK(2).build());
+            context = similarDocs.stream().map(Document::getText).collect(Collectors.joining("\n\n"));
+            currentClient = baseChatClient;
+        } else {
+            log.info("ROUTE: SMALL TALK (RAG OFF, TOOLS OFF)");
+            currentClient = baseChatClient;
+        }
+        // --- FIM DO GUARDRAIL ---
 
         List<Message> history = getSpringAiHistory(userId);
-        log.info("CHAT HISTORY RETRIEVED: {}", history);
 
         StringBuilder fullAiResponse = new StringBuilder();
 
-        log.info("SENDING CONTEXT AND HISTORY AS REQUEST TO BOREAL");
-        return processUserMessage(history, context)
+        log.info("SENDING REQUEST TO BOREAL");
+        return processUserMessage(currentClient, history, context)
                 .doOnNext(chunk -> fullAiResponse.append(chunk))
                 .doOnComplete(() -> {
                     saveChatMessage(fullAiResponse.toString(), userId, "ai");
+                })
+                // GUARDRAIL REATIVO: Se der erro ou retornar vazio, o fluxo é capturado em vez
+                // de falhar
+                .defaultIfEmpty("Desculpe, tive um lapso de memória! Pode repetir a pergunta?")
+                .onErrorResume(e -> {
+                    log.error("Error in AI Stream", e);
+                    return Flux
+                            .just("Desculpe, ocorreu um erro técnico ao processar sua mensagem. Pode tentar de novo?");
                 });
     }
 }
