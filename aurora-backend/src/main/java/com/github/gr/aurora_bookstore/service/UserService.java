@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +31,14 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
+    public Boolean existsByEmail(String email){
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    public Optional<User> findByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
+
     public User getEntityById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -41,15 +50,6 @@ public class UserService {
         return UserMapper.toReadDto(savedUser);
     }
 
-    public UserReadDTO register(UserRegisterDTO registerDto){
-        if(userRepository.findByEmail(registerDto.getEmail()).isPresent()){
-            return null;
-        }else{
-            String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.getPassword());
-            registerDto.setPassword(encryptedPassword);
-            return create(registerDto);
-        }
-    }
 
     public UserReadDTO update(Long id, UserRegisterDTO dto) {
         User existingUser = getEntityById(id);
