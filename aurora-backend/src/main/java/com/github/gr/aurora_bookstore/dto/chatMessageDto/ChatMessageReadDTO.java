@@ -4,7 +4,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ChatMessageReadDto {
+public class ChatMessageReadDTO {
     private Long id;
     private String chatRole;
     private String content;

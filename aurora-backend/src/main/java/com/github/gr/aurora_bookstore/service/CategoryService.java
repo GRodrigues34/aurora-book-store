@@ -1,7 +1,7 @@
 package com.github.gr.aurora_bookstore.service;
 
-import com.github.gr.aurora_bookstore.dto.categoryDto.CategoryCreateDto;
-import com.github.gr.aurora_bookstore.dto.categoryDto.CategoryReadDto;
+import com.github.gr.aurora_bookstore.dto.categoryDto.CategoryCreateDTO;
+import com.github.gr.aurora_bookstore.dto.categoryDto.CategoryReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.Category;
 import com.github.gr.aurora_bookstore.model.mapper.CategoryMapper;
 import com.github.gr.aurora_bookstore.repository.CategoryRepository;
@@ -17,25 +17,25 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public List<CategoryReadDto> findAll() {
+    public List<CategoryReadDTO> findAll() {
         return categoryRepository.findAll().stream()
                 .map(CategoryMapper::toReadDto)
                 .collect(Collectors.toList());
     }
 
-    public CategoryReadDto findById(Long id) {
+    public CategoryReadDTO findById(Long id) {
         return categoryRepository.findById(id)
                 .map(CategoryMapper::toReadDto)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
     }
 
-    public CategoryReadDto create(CategoryCreateDto dto) {
+    public CategoryReadDTO create(CategoryCreateDTO dto) {
         Category category = CategoryMapper.toEntity(dto);
         Category savedCategory = categoryRepository.save(category);
         return CategoryMapper.toReadDto(savedCategory);
     }
 
-    public CategoryReadDto update(Long id, CategoryCreateDto dto) {
+    public CategoryReadDTO update(Long id, CategoryCreateDTO dto) {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
         existingCategory.setName(dto.getName());

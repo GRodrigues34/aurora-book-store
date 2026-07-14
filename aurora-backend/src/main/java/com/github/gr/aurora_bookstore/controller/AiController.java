@@ -1,11 +1,12 @@
 package com.github.gr.aurora_bookstore.controller;
 
 import com.github.gr.aurora_bookstore.dto.aiDto.ChatRequest;
-import com.github.gr.aurora_bookstore.dto.chatMessageDto.ChatMessageReadDto;
+import com.github.gr.aurora_bookstore.dto.chatMessageDto.ChatMessageReadDTO;
 import com.github.gr.aurora_bookstore.service.AiService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ public class AiController {
     private final AiService aiService;
 
     @PostMapping("/api/chat")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Flux<String>> chat(@RequestBody ChatRequest request) {
         Flux<String> flux = aiService.receiveUserMessage(request);
 
@@ -30,8 +32,10 @@ public class AiController {
                 .body(flux);
     }
 
+
     @GetMapping("/api/chat/history/{userId}")
-    public ResponseEntity<List<ChatMessageReadDto>> getChatHistory(@PathVariable Long userId) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ChatMessageReadDTO>> getChatHistory(@PathVariable Long userId) {
         return ResponseEntity.ok(aiService.chatMessagesToDto(userId));
     }
 

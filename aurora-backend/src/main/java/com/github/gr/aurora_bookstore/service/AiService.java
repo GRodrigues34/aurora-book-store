@@ -1,7 +1,7 @@
 package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.aiDto.ChatRequest;
-import com.github.gr.aurora_bookstore.dto.chatMessageDto.ChatMessageReadDto;
+import com.github.gr.aurora_bookstore.dto.chatMessageDto.ChatMessageReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.ChatMessage;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.model.mapper.ChatMessageMapper;
@@ -99,9 +99,9 @@ public class AiService {
         return springAiMessages;
     }
 
-    public List<ChatMessageReadDto> chatMessagesToDto(Long userId) {
+    public List<ChatMessageReadDTO> chatMessagesToDto(Long userId) {
         List<ChatMessage> lastMessages = chatMessageRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId).reversed();
-        List<ChatMessageReadDto> chatMessageReadDtos = new ArrayList<>();
+        List<ChatMessageReadDTO> chatMessageReadDtos = new ArrayList<>();
         for (ChatMessage chatMessage : lastMessages) {
             chatMessageReadDtos.add(ChatMessageMapper.toReadDto(chatMessage));
         }

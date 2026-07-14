@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class BookCreateDto {
+public class BookCreateDTO {
 
     @NotBlank(message = "Title is required")
     private String title;

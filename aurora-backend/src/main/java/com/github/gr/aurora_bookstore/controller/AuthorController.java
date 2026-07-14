@@ -1,12 +1,13 @@
 package com.github.gr.aurora_bookstore.controller;
 
-import com.github.gr.aurora_bookstore.dto.authorDto.AuthorCreateDto;
-import com.github.gr.aurora_bookstore.dto.authorDto.AuthorReadDto;
+import com.github.gr.aurora_bookstore.dto.authorDto.AuthorCreateDTO;
+import com.github.gr.aurora_bookstore.dto.authorDto.AuthorReadDTO;
 import com.github.gr.aurora_bookstore.service.AuthorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,22 +20,24 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public ResponseEntity<List<AuthorReadDto>> findAll() {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<AuthorReadDTO>> findAll() {
         return ResponseEntity.ok(authorService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorReadDto> findById(@PathVariable Long id) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AuthorReadDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(authorService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<AuthorReadDto> create(@Valid @RequestBody AuthorCreateDto dto) {
+    public ResponseEntity<AuthorReadDTO> create(@Valid @RequestBody AuthorCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authorService.create(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AuthorReadDto> update(@PathVariable Long id, @Valid @RequestBody AuthorCreateDto dto) {
+    public ResponseEntity<AuthorReadDTO> update(@PathVariable Long id, @Valid @RequestBody AuthorCreateDTO dto) {
         return ResponseEntity.ok(authorService.update(id, dto));
     }
 

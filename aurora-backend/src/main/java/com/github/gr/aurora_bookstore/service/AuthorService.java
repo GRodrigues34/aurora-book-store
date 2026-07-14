@@ -1,7 +1,7 @@
 package com.github.gr.aurora_bookstore.service;
 
-import com.github.gr.aurora_bookstore.dto.authorDto.AuthorCreateDto;
-import com.github.gr.aurora_bookstore.dto.authorDto.AuthorReadDto;
+import com.github.gr.aurora_bookstore.dto.authorDto.AuthorCreateDTO;
+import com.github.gr.aurora_bookstore.dto.authorDto.AuthorReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.Author;
 import com.github.gr.aurora_bookstore.model.mapper.AuthorMapper;
 import com.github.gr.aurora_bookstore.repository.AuthorRepository;
@@ -17,25 +17,25 @@ public class AuthorService {
 
     private final AuthorRepository authorRepository;
 
-    public List<AuthorReadDto> findAll() {
+    public List<AuthorReadDTO> findAll() {
         return authorRepository.findAll().stream()
                 .map(AuthorMapper::toReadDto)
                 .collect(Collectors.toList());
     }
 
-    public AuthorReadDto findById(Long id) {
+    public AuthorReadDTO findById(Long id) {
         return authorRepository.findById(id)
                 .map(AuthorMapper::toReadDto)
                 .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
     }
 
-    public AuthorReadDto create(AuthorCreateDto dto) {
+    public AuthorReadDTO create(AuthorCreateDTO dto) {
         Author author = AuthorMapper.toEntity(dto);
         Author savedAuthor = authorRepository.save(author);
         return AuthorMapper.toReadDto(savedAuthor);
     }
 
-    public AuthorReadDto update(Long id, AuthorCreateDto dto) {
+    public AuthorReadDTO update(Long id, AuthorCreateDTO dto) {
         Author existingAuthor = authorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
         existingAuthor.setName(dto.getName());

@@ -1,11 +1,12 @@
 package com.github.gr.aurora_bookstore.dto.userDto;
 
+import com.github.gr.aurora_bookstore.model.enums.UserRole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class UserCreateDto {
+public class UserRegisterDTO {
     @NotBlank(message = "Username is required")
     private String username;
 
@@ -17,5 +18,5 @@ public class UserCreateDto {
     private String password;
 
     @NotBlank(message = "Role is required")
-    private String role;
+    private UserRole role;
 }

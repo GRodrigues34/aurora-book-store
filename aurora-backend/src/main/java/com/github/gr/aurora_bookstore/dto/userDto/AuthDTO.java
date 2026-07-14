@@ -1,4 +1,5 @@
 package com.github.gr.aurora_bookstore.dto.userDto;
 
-public class AuthDTO {
+
+public record AuthDTO(String login, String password) {
 }

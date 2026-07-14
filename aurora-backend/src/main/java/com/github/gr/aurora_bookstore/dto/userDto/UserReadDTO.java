@@ -3,7 +3,7 @@ package com.github.gr.aurora_bookstore.dto.userDto;
 import lombok.Data;
 
 @Data
-public class UserReadDto {
+public class UserReadDTO {
     private Long id;
     private String username;
     private String email;

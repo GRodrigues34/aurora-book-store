@@ -1,7 +1,7 @@
 package com.github.gr.aurora_bookstore.model.mapper;
 
-import com.github.gr.aurora_bookstore.dto.bookDto.BookCreateDto;
-import com.github.gr.aurora_bookstore.dto.bookDto.BookReadDto;
+import com.github.gr.aurora_bookstore.dto.bookDto.BookCreateDTO;
+import com.github.gr.aurora_bookstore.dto.bookDto.BookReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.Author;
 import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.Category;
@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 
 public class BookMapper {
 
-    public static BookReadDto toReadDto(Book book) {
+    public static BookReadDTO toReadDto(Book book) {
         if (book == null) return null;
-        BookReadDto dto = new BookReadDto();
+        BookReadDTO dto = new BookReadDTO();
         dto.setId(book.getId());
         dto.setTitle(book.getTitle());
         dto.setDescription(book.getDescription());
@@ -43,7 +43,7 @@ public class BookMapper {
         return dto;
     }
 
-    public static Book toEntity(BookCreateDto dto, Set<Author> authors, Set<Category> categories, Set<Genre> genres) {
+    public static Book toEntity(BookCreateDTO dto, Set<Author> authors, Set<Category> categories, Set<Genre> genres) {
         if (dto == null) return null;
         return Book.builder()
                 .title(dto.getTitle())
