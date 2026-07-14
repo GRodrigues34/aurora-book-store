@@ -6,6 +6,7 @@ import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.model.mapper.UserMapper;
 import com.github.gr.aurora_bookstore.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +33,10 @@ public class UserService {
     }
 
     public Boolean existsByEmail(String email){
-        return userRepository.findByEmail(email).isPresent();
+        return userRepository.findByEmail(email) != null;
     }
 
-    public Optional<User> findByEmail(String email){
+    public UserDetails userDetailsFindByEmail(String email){
         return userRepository.findByEmail(email);
     }
 
