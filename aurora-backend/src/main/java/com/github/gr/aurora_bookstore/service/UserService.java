@@ -35,11 +35,11 @@ public class UserService implements UserDetailsService {
     }
 
     public Boolean existsByEmail(String email){
-        return userRepository.findByEmail(email) != null;
+        return userRepository.existsByEmail(email);
     }
 
     public UserDetails userDetailsFindByEmail(String email){
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email).orElse(null);
     }
 
     public User getEntityById(Long id) {
@@ -72,7 +72,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }

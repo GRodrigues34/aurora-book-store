@@ -29,7 +29,8 @@ public class AuthService {
     @Autowired
     AuthenticationManager authenticationManager;
 
-    private final String secret = "conformidade";
+    @org.springframework.beans.factory.annotation.Value("${api.security.token.secret}")
+    private String secret;
 
     public UserReadDTO register(UserRegisterDTO registerDto) {
         if (userService.existsByEmail(registerDto.getEmail())) {
@@ -76,6 +77,6 @@ public class AuthService {
     }
 
     private Instant getExpirationDate() {
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("UTC"));
+        return Instant.now().plusSeconds(7200);
     }
 }

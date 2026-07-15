@@ -37,6 +37,11 @@ spring:
         client:
           host: http://localhost
           port: 8000
+api:
+  security:
+    token:
+      secret: "conformidade"
+
 logging:
   level:
     "[org.springframework]": INFO
