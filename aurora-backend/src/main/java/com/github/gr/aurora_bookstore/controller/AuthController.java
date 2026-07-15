@@ -1,6 +1,6 @@
 package com.github.gr.aurora_bookstore.controller;
 
-import com.github.gr.aurora_bookstore.dto.userDto.AuthDTO;
+import com.github.gr.aurora_bookstore.dto.userDto.LoginDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.LoginResponseDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserRegisterDTO;
@@ -22,18 +22,18 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthDTO authDto){
-        LoginResponseDTO token = authService.login(authDto);
-        if(token == null){
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginDTO loginDto) {
+        LoginResponseDTO token = authService.login(loginDto);
+        if (token == null) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserReadDTO> register(@RequestBody @Valid UserRegisterDTO registerDto){
-        UserReadDTO registeredUser =  authService.register(registerDto);
-        if(registeredUser == null){
+    public ResponseEntity<UserReadDTO> register(@RequestBody @Valid UserRegisterDTO registerDto) {
+        UserReadDTO registeredUser = authService.register(registerDto);
+        if (registeredUser == null) {
             return ResponseEntity.badRequest().build();
         } else {
             return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);

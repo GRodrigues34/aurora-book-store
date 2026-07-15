@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.github.gr.aurora_bookstore.dto.userDto.AuthDTO;
+import com.github.gr.aurora_bookstore.dto.userDto.LoginDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.LoginResponseDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserRegisterDTO;
@@ -42,8 +42,9 @@ public class AuthService {
         }
     }
 
-    public LoginResponseDTO login(AuthDTO authDto) {
-        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(authDto.login(), authDto.password());
+    public LoginResponseDTO login(LoginDTO loginDto) {
+        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(loginDto.login(),
+                loginDto.password());
         var auth = authenticationManager.authenticate(usernamePassword);
         String token = generateToken((User) auth.getPrincipal());
         return new LoginResponseDTO(token);
