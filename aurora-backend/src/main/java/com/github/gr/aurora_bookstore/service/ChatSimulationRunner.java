@@ -2,6 +2,7 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.aiDto.ChatRequest;
 import com.github.gr.aurora_bookstore.model.entity.User;
+import com.github.gr.aurora_bookstore.model.enums.UserRole;
 import com.github.gr.aurora_bookstore.repository.ChatMessageRepository;
 import com.github.gr.aurora_bookstore.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class ChatSimulationRunner implements CommandLineRunner {
         user.setUsername("test_conversational_user");
         user.setEmail("test_" + java.util.UUID.randomUUID().toString().substring(0, 8) + "@aurora.com");
         user.setPassword("password123");
-        user.setRole("USER");
+        user.setRole(UserRole.valueOf("USER"));
 
         User testUser = userRepository.save(user);
 
