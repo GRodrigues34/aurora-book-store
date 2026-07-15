@@ -9,16 +9,15 @@ import com.github.gr.aurora_bookstore.dto.userDto.LoginResponseDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserRegisterDTO;
 import com.github.gr.aurora_bookstore.model.entity.User;
-import com.github.gr.aurora_bookstore.security.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationManager.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Service
 public class AuthService {
@@ -45,7 +44,7 @@ public class AuthService {
     public LoginResponseDTO login(LoginDTO loginDto) {
         UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(loginDto.login(),
                 loginDto.password());
-        var auth = authenticationManager.authenticate(usernamePassword);
+        Authentication auth = authenticationManager.authenticate(usernamePassword);
         String token = generateToken((User) auth.getPrincipal());
         return new LoginResponseDTO(token);
     }
