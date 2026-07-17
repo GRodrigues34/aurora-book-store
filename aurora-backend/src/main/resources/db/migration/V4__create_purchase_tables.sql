@@ -26,8 +26,8 @@ CREATE TABLE order_item(
     order_id BIGINT NOT NULL,
     book_id BIGINT NOT NULL,
     quantity INT NOT NULL,
-    item_price INT NOT NULL,
-    total_price INT NOT NULL,
+    item_price FLOAT NOT NULL,
+    total_price FLOAT NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (book_id) REFERENCES books(id)
 );

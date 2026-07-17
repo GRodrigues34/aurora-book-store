@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Data
@@ -26,7 +27,7 @@ public class Book {
     @Column(length = 500)
     private String description;
 
-    private Float price;
+    private BigDecimal price;
 
     @Column(name = "image_url")
     private String imageUrl;

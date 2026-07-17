@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -46,7 +48,7 @@ class BookServiceTest {
         // Arrange
         BookCreateDTO dto = new BookCreateDTO();
         dto.setTitle("O Guia do Mochileiro das Galáxias");
-        dto.setPrice(42.0f);
+        dto.setPrice(BigDecimal.valueOf(42.0));
         dto.setStock(10);
         dto.setAuthorIds(Set.of(1L));
         dto.setCategoryIds(Set.of(2L));
@@ -65,7 +67,7 @@ class BookServiceTest {
         Book savedBook = new Book();
         savedBook.setId(100L);
         savedBook.setTitle("O Guia do Mochileiro das Galáxias");
-        savedBook.setPrice(42.0f);
+        savedBook.setPrice(BigDecimal.valueOf(42.0));
         savedBook.setAuthors(Set.of(author));
         savedBook.setCategories(Set.of(category));
 
