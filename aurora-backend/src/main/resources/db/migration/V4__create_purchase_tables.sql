@@ -10,10 +10,10 @@ CREATE TABLE cart_item(
     book_id BIGINT NOT NULL,
     quantity INT NOT NULl,
     FOREIGN KEY (cart_id) REFERENCES cart(id),
-    FOREIGN KEY (book_id) REFERENCES books(id),
+    FOREIGN KEY (book_id) REFERENCES books(id)
 );
 
-CREATE TABLE order(
+CREATE TABLE orders(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     total_price FLOAT NOT NULL,
@@ -26,6 +26,7 @@ CREATE TABLE order_item(
     order_id BIGINT NOT NULL,
     book_id BIGINT NOT NULL,
     quantity INT NOT NULL,
+    item_price INT NOT NULL,
     total_price INT NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (book_id) REFERENCES books(id)
