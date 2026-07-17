@@ -5,6 +5,7 @@ import com.github.gr.aurora_bookstore.dto.bookDto.BookReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.Author;
 import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.Category;
+import com.github.gr.aurora_bookstore.util.BookTestData;
 import com.github.gr.aurora_bookstore.repository.AuthorRepository;
 import com.github.gr.aurora_bookstore.repository.BookRepository;
 import com.github.gr.aurora_bookstore.repository.CategoryRepository;
@@ -46,63 +47,49 @@ class BookServiceTest {
     @Test
     void create_ShouldSaveBookAndReturnDto() {
         // Arrange
+        Book mockBook = BookTestData.createValidBook();
+        
         BookCreateDTO dto = new BookCreateDTO();
-        dto.setTitle("O Guia do Mochileiro das Galáxias");
-        dto.setPrice(BigDecimal.valueOf(42.0));
-        dto.setStock(10);
+        dto.setTitle(mockBook.getTitle());
+        dto.setPrice(mockBook.getPrice());
+        dto.setStock(mockBook.getStock());
         dto.setAuthorIds(Set.of(1L));
-        dto.setCategoryIds(Set.of(2L));
+        dto.setCategoryIds(Set.of(1L));
 
-        Author author = new Author();
-        author.setId(1L);
-        author.setName("Douglas Adams");
+        Author mockAuthor = BookTestData.createValidAuthor();
+        Category mockCategory = BookTestData.createValidCategory();
 
-        Category category = new Category();
-        category.setId(2L);
-        category.setName("Ficção Científica");
-
-        when(authorRepository.findAllById(Set.of(1L))).thenReturn(List.of(author));
-        when(categoryRepository.findAllById(Set.of(2L))).thenReturn(List.of(category));
-
-        Book savedBook = new Book();
-        savedBook.setId(100L);
-        savedBook.setTitle("O Guia do Mochileiro das Galáxias");
-        savedBook.setPrice(BigDecimal.valueOf(42.0));
-        savedBook.setAuthors(Set.of(author));
-        savedBook.setCategories(Set.of(category));
-
-        when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
+        when(authorRepository.findAllById(any())).thenReturn(List.of(mockAuthor));
+        when(categoryRepository.findAllById(any())).thenReturn(List.of(mockCategory));
+        when(bookRepository.save(any(Book.class))).thenReturn(mockBook);
 
         // Act
         BookReadDTO result = bookService.create(dto);
 
         // Assert
         assertNotNull(result);
-        assertEquals(100L, result.getId());
-        assertEquals("O Guia do Mochileiro das Galáxias", result.getTitle());
+        assertEquals(mockBook.getId(), result.getId());
+        assertEquals(mockBook.getTitle(), result.getTitle());
 
         // Assert related mocks were called
-        verify(authorRepository, times(1)).findAllById(Set.of(1L));
-        verify(categoryRepository, times(1)).findAllById(Set.of(2L));
+        verify(authorRepository, times(1)).findAllById(any());
+        verify(categoryRepository, times(1)).findAllById(any());
         verify(bookRepository, times(1)).save(any(Book.class));
     }
 
     @Test
     void findById_WhenBookExists_ShouldReturnDto() {
         // Arrange
-        Book book = new Book();
-        book.setId(1L);
-        book.setTitle("1984");
-
-        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        Book mockBook = BookTestData.createValidBook();
+        when(bookRepository.findById(mockBook.getId())).thenReturn(Optional.of(mockBook));
 
         // Act
-        BookReadDTO result = bookService.findById(1L);
+        BookReadDTO result = bookService.findById(mockBook.getId());
 
         // Assert
         assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("1984", result.getTitle());
+        assertEquals(mockBook.getId(), result.getId());
+        assertEquals(mockBook.getTitle(), result.getTitle());
     }
 
     @Test

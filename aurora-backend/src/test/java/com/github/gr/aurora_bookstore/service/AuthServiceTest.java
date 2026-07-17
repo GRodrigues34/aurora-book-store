@@ -4,6 +4,7 @@ import com.github.gr.aurora_bookstore.dto.userDto.UserRegisterDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.model.enums.UserRole;
+import com.github.gr.aurora_bookstore.util.UserTestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,8 +85,7 @@ class AuthServiceTest {
     @Test
     void generateToken_ShouldReturnValidToken() {
         // Arrange
-        User user = new User();
-        user.setEmail("auth@test.com");
+        User user = UserTestData.createValidUserUser();
 
         // Act
         String token = authService.generateToken(user);
@@ -98,15 +98,14 @@ class AuthServiceTest {
     @Test
     void validateTokenAndRetrieveSubject_WithValidToken_ShouldReturnEmail() {
         // Arrange
-        User user = new User();
-        user.setEmail("validate@test.com");
+        User user = UserTestData.createValidUserUser();
         String token = authService.generateToken(user);
 
         // Act
         String subject = authService.validateTokenAndRetrieveSubject(token);
 
         // Assert
-        assertEquals("validate@test.com", subject);
+        assertEquals(user.getEmail(), subject);
     }
 
     @Test

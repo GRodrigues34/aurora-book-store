@@ -4,6 +4,7 @@ import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserRegisterDTO;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.model.enums.UserRole;
+import com.github.gr.aurora_bookstore.util.UserTestData;
 import com.github.gr.aurora_bookstore.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,16 +32,15 @@ class UserServiceTest {
     @Test
     void loadUserByUsername_WhenUserExists_ShouldReturnUserDetails() {
         // Arrange
-        User user = new User();
-        user.setEmail("test@email.com");
-        when(userRepository.findByEmail("test@email.com")).thenReturn(Optional.of(user));
+        User user = UserTestData.createValidUserUser();
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
         // Act
-        UserDetails result = userService.loadUserByUsername("test@email.com");
+        UserDetails result = userService.loadUserByUsername(user.getEmail());
 
         // Assert
         assertNotNull(result);
-        assertEquals("test@email.com", ((User) result).getEmail());
+        assertEquals(user.getEmail(), ((User) result).getEmail());
     }
 
     @Test
@@ -58,44 +58,37 @@ class UserServiceTest {
     void create_ShouldSaveUserAndReturnDto() {
         // Arrange
         UserRegisterDTO dto = new UserRegisterDTO();
-        dto.setUsername("testuser");
-        dto.setEmail("test@test.com");
-        dto.setPassword("pass");
-        dto.setRole(UserRole.USER);
+        User mockEntity = UserTestData.createValidUserUser();
+        dto.setUsername(mockEntity.getUsername());
+        dto.setEmail(mockEntity.getEmail());
+        dto.setPassword(mockEntity.getPassword());
+        dto.setRole(mockEntity.getRole());
 
-        User savedEntity = new User();
-        savedEntity.setId(1L);
-        savedEntity.setUsername("testuser");
-        savedEntity.setEmail("test@test.com");
-        savedEntity.setRole(UserRole.USER);
-
-        when(userRepository.save(any(User.class))).thenReturn(savedEntity);
+        when(userRepository.save(any(User.class))).thenReturn(mockEntity);
 
         // Act
         UserReadDTO result = userService.create(dto);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("testuser", result.getUsername());
-        assertEquals("test@test.com", result.getEmail());
+        assertEquals(mockEntity.getId(), result.getId());
+        assertEquals(mockEntity.getUsername(), result.getUsername());
+        assertEquals(mockEntity.getEmail(), result.getEmail());
     }
 
     @Test
     void findById_WhenUserExists_ShouldReturnDto() {
         // Arrange
-        User user = new User();
-        user.setId(2L);
-        user.setUsername("user2");
-        when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+        User user = UserTestData.createValidAdminUser();
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         // Act
-        UserReadDTO result = userService.findById(2L);
+        UserReadDTO result = userService.findById(user.getId());
 
         // Assert
         assertNotNull(result);
-        assertEquals(2L, result.getId());
-        assertEquals("user2", result.getUsername());
+        assertEquals(user.getId(), result.getId());
+        assertEquals(user.getUsername(), result.getUsername());
     }
 
     @Test
