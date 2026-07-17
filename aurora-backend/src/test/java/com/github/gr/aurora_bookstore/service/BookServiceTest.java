@@ -78,7 +78,7 @@ class BookServiceTest {
         assertNotNull(result);
         assertEquals(100L, result.getId());
         assertEquals("O Guia do Mochileiro das Galáxias", result.getTitle());
-        
+
         // Assert related mocks were called
         verify(authorRepository, times(1)).findAllById(Set.of(1L));
         verify(categoryRepository, times(1)).findAllById(Set.of(2L));
@@ -91,7 +91,7 @@ class BookServiceTest {
         Book book = new Book();
         book.setId(1L);
         book.setTitle("1984");
-        
+
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
 
         // Act
