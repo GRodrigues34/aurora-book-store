@@ -49,13 +49,18 @@ public class CartService {
         return CartMapper.toCartReadDto(cart);
     }
 
-    public CartReadDTO deleteItem(Long itemId) {
+    public CartReadDTO deleteItem(Long userId, Long itemId) {
         CartItem item = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
         Cart cart = item.getCart();
         if (cart == null) {
             throw new RuntimeException("Cart not found");
+        }
+
+        // Verify that the cart belongs to the requesting user
+        if (!cart.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Access denied: This cart item does not belong to you.");
         }
 
         cart.getCartItems().remove(item);

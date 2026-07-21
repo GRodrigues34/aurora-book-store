@@ -37,6 +37,7 @@ public class AuthService {
         } else {
             String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.getPassword());
             registerDto.setPassword(encryptedPassword);
+            registerDto.setRole(com.github.gr.aurora_bookstore.model.enums.UserRole.USER);
             return userService.create(registerDto);
         }
     }

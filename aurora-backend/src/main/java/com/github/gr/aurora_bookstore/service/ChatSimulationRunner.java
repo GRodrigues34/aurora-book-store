@@ -66,9 +66,9 @@ public class ChatSimulationRunner implements CommandLineRunner {
     private void chat(String message, User testUser, StringBuilder fullChat) {
         System.out.println("🔄 Processando mensagem: '" + message + "'...");
 
-        ChatRequest request = new ChatRequest(message, String.valueOf(testUser.getId()));
+        ChatRequest request = new ChatRequest(message);
 
-        String fullResponse = aiService.receiveUserMessage(request)
+        String fullResponse = aiService.receiveUserMessage(request, testUser.getId())
                 .reduce(String::concat)
                 .block();
 

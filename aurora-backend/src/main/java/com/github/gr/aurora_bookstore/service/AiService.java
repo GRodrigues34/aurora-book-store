@@ -108,10 +108,9 @@ public class AiService {
         return chatMessageReadDtos;
     }
 
-    public Flux<String> receiveUserMessage(ChatRequest chatRequest) {
-        log.info("RECEIVED REQUEST: {}", chatRequest);
+    public Flux<String> receiveUserMessage(ChatRequest chatRequest, Long userId) {
+        log.info("RECEIVED REQUEST: {}, user: {}", chatRequest, userId);
         String userMessage = chatRequest.message();
-        Long userId = Long.valueOf(chatRequest.userId());
 
         saveChatMessage(userMessage, userId, "user");
 

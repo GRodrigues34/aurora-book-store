@@ -140,7 +140,7 @@ public class CartServiceTest {
         when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.of(item));
 
         // Act
-        CartReadDTO result = cartService.deleteItem(itemIdToDelete);
+        CartReadDTO result = cartService.deleteItem(user.getId(), itemIdToDelete);
 
         // Assert
         verify(cartRepository, times(1)).save(cartCaptor.capture());
@@ -160,7 +160,7 @@ public class CartServiceTest {
         when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.of(item));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.deleteItem(itemIdToDelete));
+        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), itemIdToDelete));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 
@@ -172,7 +172,7 @@ public class CartServiceTest {
         when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.deleteItem(itemIdToDelete));
+        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), itemIdToDelete));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 }
