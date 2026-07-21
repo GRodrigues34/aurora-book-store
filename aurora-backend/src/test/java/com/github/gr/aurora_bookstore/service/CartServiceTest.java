@@ -1,6 +1,5 @@
 package com.github.gr.aurora_bookstore.service;
 
-import com.github.gr.aurora_bookstore.dto.cartDto.CartItemDeleteDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartItemInsertDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.Book;
@@ -124,7 +123,6 @@ public class CartServiceTest {
     void shouldRemoveItemFromCartSuccessfully() {
         // Arrange
         Long itemIdToDelete = 100L;
-        CartItemDeleteDTO deleteDTO = new CartItemDeleteDTO(itemIdToDelete);
 
         Cart cart = new Cart();
         cart.setId(10L);
@@ -139,11 +137,10 @@ public class CartServiceTest {
 
         cart.getCartItems().add(item);
 
-        when(cartRepository.findByUserId(user.getId())).thenReturn(cart);
         when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.of(item));
 
         // Act
-        CartReadDTO result = cartService.deleteItem(user.getId(), deleteDTO);
+        CartReadDTO result = cartService.deleteItem(itemIdToDelete);
 
         // Assert
         verify(cartRepository, times(1)).save(cartCaptor.capture());
@@ -155,11 +152,15 @@ public class CartServiceTest {
     @Test
     void shouldThrowExceptionWhenRemovingItemAndCartDoesNotExist() {
         // Arrange
-        CartItemDeleteDTO deleteDTO = new CartItemDeleteDTO(100L);
-        when(cartRepository.findByUserId(user.getId())).thenReturn(null);
+        Long itemIdToDelete = 100L;
+        CartItem item = new CartItem();
+        item.setId(itemIdToDelete);
+        item.setCart(null);
+
+        when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.of(item));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), deleteDTO));
+        assertThrows(RuntimeException.class, () -> cartService.deleteItem(itemIdToDelete));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 
@@ -167,18 +168,11 @@ public class CartServiceTest {
     void shouldThrowExceptionWhenRemovingNonExistentItem() {
         // Arrange
         Long itemIdToDelete = 999L;
-        CartItemDeleteDTO deleteDTO = new CartItemDeleteDTO(itemIdToDelete);
 
-        Cart cart = new Cart();
-        cart.setId(10L);
-        cart.setUser(user);
-        cart.setCartItems(new HashSet<>());
-
-        when(cartRepository.findByUserId(user.getId())).thenReturn(cart);
         when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), deleteDTO));
+        assertThrows(RuntimeException.class, () -> cartService.deleteItem(itemIdToDelete));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 }

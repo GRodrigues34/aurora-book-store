@@ -1,6 +1,5 @@
 package com.github.gr.aurora_bookstore.controller;
 
-import com.github.gr.aurora_bookstore.dto.cartDto.CartItemDeleteDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartItemInsertDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartReadDTO;
 import com.github.gr.aurora_bookstore.service.CartService;
@@ -31,9 +30,9 @@ public class CartController {
         return ResponseEntity.ok(cartService.getCart(userId));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{itemId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CartReadDTO> deleteItem(@RequestBody CartItemDeleteDTO itemDeleteDTO, Principal principal){
-        return ResponseEntity.ok(cartService.deleteItem(Long.valueOf(principal.getName()), itemDeleteDTO));
+    public ResponseEntity<CartReadDTO> deleteItem(@PathVariable Long itemId){
+        return ResponseEntity.ok(cartService.deleteItem(itemId));
     }
 }

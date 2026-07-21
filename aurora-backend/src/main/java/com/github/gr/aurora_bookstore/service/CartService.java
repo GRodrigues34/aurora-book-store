@@ -1,6 +1,5 @@
 package com.github.gr.aurora_bookstore.service;
 
-import com.github.gr.aurora_bookstore.dto.cartDto.CartItemDeleteDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartItemInsertDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.Book;
@@ -50,14 +49,14 @@ public class CartService {
         return CartMapper.toCartReadDto(cart);
     }
 
-    public CartReadDTO deleteItem(Long userId, CartItemDeleteDTO itemDeleteDTO) {
-        Cart cart = cartRepository.findByUserId(userId);
+    public CartReadDTO deleteItem(Long itemId) {
+        CartItem item = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        Cart cart = item.getCart();
         if (cart == null) {
             throw new RuntimeException("Cart not found");
         }
-
-        CartItem item = cartItemRepository.findById(itemDeleteDTO.itemId())
-                .orElseThrow(() -> new RuntimeException("Item not found"));
 
         cart.getCartItems().remove(item);
         cartRepository.save(cart);
