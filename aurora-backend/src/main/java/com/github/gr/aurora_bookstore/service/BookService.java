@@ -2,10 +2,7 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.bookDto.BookCreateDTO;
 import com.github.gr.aurora_bookstore.dto.bookDto.BookReadDTO;
-import com.github.gr.aurora_bookstore.model.entity.Author;
-import com.github.gr.aurora_bookstore.model.entity.Book;
-import com.github.gr.aurora_bookstore.model.entity.Category;
-import com.github.gr.aurora_bookstore.model.entity.Genre;
+import com.github.gr.aurora_bookstore.model.entity.*;
 import com.github.gr.aurora_bookstore.model.mapper.BookMapper;
 import com.github.gr.aurora_bookstore.repository.AuthorRepository;
 import com.github.gr.aurora_bookstore.repository.BookRepository;
@@ -38,6 +35,11 @@ public class BookService {
         return bookRepository.findById(id)
                 .map(BookMapper::toReadDto)
                 .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+    }
+
+    public Book getEntityById(Long id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
     public BookReadDTO create(BookCreateDTO dto) {

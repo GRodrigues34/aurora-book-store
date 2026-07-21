@@ -1,14 +1,14 @@
 package com.github.gr.aurora_bookstore.service;
 
+import com.github.gr.aurora_bookstore.dto.cartDto.CartItemDeleteDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartItemInsertDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.Cart;
 import com.github.gr.aurora_bookstore.model.entity.CartItem;
 import com.github.gr.aurora_bookstore.model.entity.User;
-import com.github.gr.aurora_bookstore.repository.BookRepository;
+import com.github.gr.aurora_bookstore.repository.CartItemRepository;
 import com.github.gr.aurora_bookstore.repository.CartRepository;
-import com.github.gr.aurora_bookstore.repository.UserRepository;
 import com.github.gr.aurora_bookstore.util.BookTestData;
 import com.github.gr.aurora_bookstore.util.UserTestData;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,10 +37,10 @@ public class CartServiceTest {
     private CartRepository cartRepository;
 
     @Mock
-    private BookRepository bookRepository;
+    private CartItemRepository cartItemRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private BookService bookService;
 
     @Captor
     private ArgumentCaptor<Cart> cartCaptor;
@@ -56,29 +56,14 @@ public class CartServiceTest {
 
     @Test
     void shouldCreateCartSuccessfully() {
-        // Arrange
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
         // Act
-        cartService.create(user.getId());
+        cartService.create(user);
 
         // Assert
-        verify(userRepository, times(1)).findById(user.getId());
         verify(cartRepository, times(1)).save(cartCaptor.capture());
 
         Cart savedCart = cartCaptor.getValue();
         assertEquals(user, savedCart.getUser());
-        assertTrue(savedCart.getCartItems() == null || savedCart.getCartItems().isEmpty());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenCreatingCartForNonExistentUser() {
-        // Arrange
-        when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> cartService.create(999L));
-        verify(cartRepository, never()).save(any(Cart.class));
     }
 
     @Test
@@ -91,11 +76,11 @@ public class CartServiceTest {
         cart.setUser(user);
         cart.setCartItems(new HashSet<>());
 
-        when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
-        when(bookRepository.findById(book.getId())).thenReturn(Optional.of(book));
+        when(cartRepository.findByUserId(user.getId())).thenReturn(cart);
+        when(bookService.getEntityById(book.getId())).thenReturn(book);
 
         // Act
-        CartReadDTO result = cartService.insert(user.getId(), cartInsertDto);
+        CartReadDTO result = cartService.insertItem(user.getId(), cartInsertDto);
 
         // Assert
         verify(cartRepository, times(1)).save(cartCaptor.capture());
@@ -109,6 +94,17 @@ public class CartServiceTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenInsertingItemAndCartDoesNotExist() {
+        // Arrange
+        CartItemInsertDTO cartInsertDto = new CartItemInsertDTO(book.getId(), 2);
+        when(cartRepository.findByUserId(user.getId())).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> cartService.insertItem(user.getId(), cartInsertDto));
+        verify(cartRepository, never()).save(any(Cart.class));
+    }
+
+    @Test
     void shouldThrowExceptionWhenInsertingItemAndBookDoesNotExist() {
         // Arrange
         CartItemInsertDTO cartInsertDto = new CartItemInsertDTO(999L, 2);
@@ -116,11 +112,11 @@ public class CartServiceTest {
         cart.setId(10L);
         cart.setUser(user);
 
-        when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
-        when(bookRepository.findById(999L)).thenReturn(Optional.empty());
+        when(cartRepository.findByUserId(user.getId())).thenReturn(cart);
+        when(bookService.getEntityById(999L)).thenThrow(new RuntimeException("Book not found"));
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> cartService.insert(user.getId(), cartInsertDto));
+        assertThrows(RuntimeException.class, () -> cartService.insertItem(user.getId(), cartInsertDto));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 
@@ -128,6 +124,7 @@ public class CartServiceTest {
     void shouldRemoveItemFromCartSuccessfully() {
         // Arrange
         Long itemIdToDelete = 100L;
+        CartItemDeleteDTO deleteDTO = new CartItemDeleteDTO(itemIdToDelete);
 
         Cart cart = new Cart();
         cart.setId(10L);
@@ -142,10 +139,11 @@ public class CartServiceTest {
 
         cart.getCartItems().add(item);
 
-        when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(user.getId())).thenReturn(cart);
+        when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.of(item));
 
         // Act
-        CartReadDTO result = cartService.itemDelete(user.getId(), itemIdToDelete);
+        CartReadDTO result = cartService.deleteItem(user.getId(), deleteDTO);
 
         // Assert
         verify(cartRepository, times(1)).save(cartCaptor.capture());
@@ -155,24 +153,32 @@ public class CartServiceTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenRemovingItemAndCartDoesNotExist() {
+        // Arrange
+        CartItemDeleteDTO deleteDTO = new CartItemDeleteDTO(100L);
+        when(cartRepository.findByUserId(user.getId())).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), deleteDTO));
+        verify(cartRepository, never()).save(any(Cart.class));
+    }
+
+    @Test
     void shouldThrowExceptionWhenRemovingNonExistentItem() {
         // Arrange
         Long itemIdToDelete = 999L;
+        CartItemDeleteDTO deleteDTO = new CartItemDeleteDTO(itemIdToDelete);
 
         Cart cart = new Cart();
         cart.setId(10L);
         cart.setUser(user);
         cart.setCartItems(new HashSet<>());
 
-        CartItem item = new CartItem();
-        item.setId(100L); // Different ID
-        item.setCart(cart);
-        cart.getCartItems().add(item);
-
-        when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(user.getId())).thenReturn(cart);
+        when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> cartService.itemDelete(user.getId(), itemIdToDelete));
+        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), deleteDTO));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 }

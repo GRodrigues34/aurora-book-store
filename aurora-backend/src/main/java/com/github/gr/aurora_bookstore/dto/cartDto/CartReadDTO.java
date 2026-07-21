@@ -9,5 +9,4 @@ import java.util.Set;
 @Data
 public class CartReadDTO {
     private Set<CartItemDTO> cartItems;
-    private BigDecimal totalPrice;
 }

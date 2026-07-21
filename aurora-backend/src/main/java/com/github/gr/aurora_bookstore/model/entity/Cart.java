@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -23,6 +26,9 @@ public class Cart {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CartItem> cartItems;
+    @Builder.Default
+    private Set<CartItem> cartItems = new HashSet<>();
 }

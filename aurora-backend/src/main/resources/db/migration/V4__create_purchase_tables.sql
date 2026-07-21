@@ -10,7 +10,7 @@ CREATE TABLE cart_item(
     book_id BIGINT NOT NULL,
     quantity INT NOT NULl,
     FOREIGN KEY (cart_id) REFERENCES cart(id),
-    FOREIGN KEY (book_id) REFERENCES books(id)
+    FOREIGN KEY (book_id) REFERENCES book(id)
 );
 
 CREATE TABLE orders(
@@ -29,7 +29,7 @@ CREATE TABLE order_item(
     item_price FLOAT NOT NULL,
     total_price FLOAT NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (book_id) REFERENCES books(id)
+    FOREIGN KEY (book_id) REFERENCES book(id)
 );
 
 
