@@ -2,6 +2,8 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.aiDto.ChatRequest;
 import com.github.gr.aurora_bookstore.dto.chatMessageDto.ChatMessageReadDTO;
+import com.github.gr.aurora_bookstore.exception.aiException.AiCommunicationException;
+import com.github.gr.aurora_bookstore.exception.aiException.InvalidMessageException;
 import com.github.gr.aurora_bookstore.model.entity.ChatMessage;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.model.mapper.ChatMessageMapper;
@@ -46,8 +48,6 @@ public class AiService {
             UserService userService,
             VectorStore vectorStore,
             BorealTools borealTools) {
-        // Create two clients: one strictly for chat/policies, and another loaded with
-        // tools.
         this.baseChatClient = chatClientBuilder.build();
         this.toolsChatClient = chatClientBuilder.defaultTools(borealTools).build();
 
@@ -70,7 +70,7 @@ public class AiService {
                     .stream()
                     .content();
         } catch (IOException e) {
-            throw new RuntimeException("Error reading AI system prompt resource", e);
+            throw new AiCommunicationException("Error reading AI system prompt resource: " + e.getMessage());
         }
     }
 
@@ -85,7 +85,6 @@ public class AiService {
     }
 
     public List<Message> getSpringAiHistory(Long userId) {
-        // Guardrail: Limit the context to the last 4 messages to prevent token overflow
         List<ChatMessage> lastMessages = chatMessageRepository.findTop4ByUserIdOrderByCreatedAtDesc(userId).reversed();
         List<Message> springAiMessages = new ArrayList<>();
 
@@ -109,6 +108,9 @@ public class AiService {
     }
 
     public Flux<String> receiveUserMessage(ChatRequest chatRequest, Long userId) {
+        if (chatRequest == null || chatRequest.message() == null || chatRequest.message().isBlank()) {
+            throw new InvalidMessageException("Message cannot be empty");
+        }
         log.info("RECEIVED REQUEST: {}, user: {}", chatRequest, userId);
         String userMessage = chatRequest.message();
 

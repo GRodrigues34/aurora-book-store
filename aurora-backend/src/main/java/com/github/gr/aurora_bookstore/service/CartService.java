@@ -2,6 +2,9 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.cartDto.CartItemInsertDTO;
 import com.github.gr.aurora_bookstore.dto.cartDto.CartReadDTO;
+import com.github.gr.aurora_bookstore.exception.cartException.CartItemNotFoundException;
+import com.github.gr.aurora_bookstore.exception.cartException.CartOwnershipException;
+import com.github.gr.aurora_bookstore.exception.bookException.ResourceNotFoundException;
 import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.Cart;
 import com.github.gr.aurora_bookstore.model.entity.CartItem;
@@ -29,7 +32,7 @@ public class CartService {
     public CartReadDTO insertItem(Long userId, CartItemInsertDTO itemDto) {
         Cart cart = cartRepository.findByUserId(userId);
         if (cart == null) {
-            throw new RuntimeException("Cart not found");
+            throw new ResourceNotFoundException("Cart not found for user id: " + userId);
         }
 
         Book book = bookService.getEntityById(itemDto.bookId());
@@ -46,20 +49,23 @@ public class CartService {
 
     public CartReadDTO getCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId);
+        if (cart == null) {
+            throw new ResourceNotFoundException("Cart not found for user id: " + userId);
+        }
         return CartMapper.toCartReadDto(cart);
     }
 
     public CartReadDTO deleteItem(Long userId, Long itemId) {
         CartItem item = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+                .orElseThrow(() -> new CartItemNotFoundException("Cart item not found with id: " + itemId));
 
         Cart cart = item.getCart();
         if (cart == null) {
-            throw new RuntimeException("Cart not found");
+            throw new ResourceNotFoundException("Cart not found");
         }
 
         if (!cart.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Access denied: This cart item does not belong to you.");
+            throw new CartOwnershipException("Access denied: This cart item does not belong to you.");
         }
 
         cart.getCartItems().remove(item);
@@ -70,7 +76,7 @@ public class CartService {
     public Cart getEntityByUserId(Long userId) {
         Cart cart = cartRepository.findByUserId(userId);
         if (cart == null) {
-            throw new RuntimeException("Cart not found");
+            throw new ResourceNotFoundException("Cart not found for user id: " + userId);
         }
         return cart;
     }

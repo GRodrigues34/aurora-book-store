@@ -2,6 +2,7 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.genreDto.GenreCreateDTO;
 import com.github.gr.aurora_bookstore.dto.genreDto.GenreReadDTO;
+import com.github.gr.aurora_bookstore.exception.bookException.GenreNotFoundException;
 import com.github.gr.aurora_bookstore.model.entity.Genre;
 import com.github.gr.aurora_bookstore.model.mapper.GenreMapper;
 import com.github.gr.aurora_bookstore.repository.GenreRepository;
@@ -26,7 +27,7 @@ public class GenreService {
     public GenreReadDTO findById(Long id) {
         return genreRepository.findById(id)
                 .map(GenreMapper::toReadDto)
-                .orElseThrow(() -> new RuntimeException("Genre not found with id: " + id));
+                .orElseThrow(() -> new GenreNotFoundException("Genre not found with id: " + id));
     }
 
     public GenreReadDTO create(GenreCreateDTO dto) {
@@ -37,7 +38,7 @@ public class GenreService {
 
     public GenreReadDTO update(Long id, GenreCreateDTO dto) {
         Genre existingGenre = genreRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Genre not found with id: " + id));
+                .orElseThrow(() -> new GenreNotFoundException("Genre not found with id: " + id));
         existingGenre.setName(dto.getName());
         Genre updatedGenre = genreRepository.save(existingGenre);
         return GenreMapper.toReadDto(updatedGenre);
@@ -45,7 +46,7 @@ public class GenreService {
 
     public void delete(Long id) {
         if (!genreRepository.existsById(id)) {
-            throw new RuntimeException("Genre not found with id: " + id);
+            throw new GenreNotFoundException("Genre not found with id: " + id);
         }
         genreRepository.deleteById(id);
     }

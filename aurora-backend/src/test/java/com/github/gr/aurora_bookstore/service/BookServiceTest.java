@@ -2,6 +2,7 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.bookDto.BookCreateDTO;
 import com.github.gr.aurora_bookstore.dto.bookDto.BookReadDTO;
+import com.github.gr.aurora_bookstore.exception.bookException.BookNotFoundException;
 import com.github.gr.aurora_bookstore.model.entity.Author;
 import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.Category;
@@ -19,8 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -98,7 +97,7 @@ class BookServiceTest {
         when(bookRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> {
             bookService.findById(99L);
         });
 

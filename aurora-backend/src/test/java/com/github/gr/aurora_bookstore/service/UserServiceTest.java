@@ -3,9 +3,9 @@ package com.github.gr.aurora_bookstore.service;
 import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserRegisterDTO;
 import com.github.gr.aurora_bookstore.model.entity.User;
-import com.github.gr.aurora_bookstore.model.enums.UserRole;
 import com.github.gr.aurora_bookstore.util.UserTestData;
 import com.github.gr.aurora_bookstore.repository.UserRepository;
+import com.github.gr.aurora_bookstore.exception.bookException.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -97,7 +97,7 @@ class UserServiceTest {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             userService.findById(99L);
         });
 

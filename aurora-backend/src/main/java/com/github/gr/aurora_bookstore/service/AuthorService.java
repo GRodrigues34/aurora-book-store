@@ -2,6 +2,7 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.authorDto.AuthorCreateDTO;
 import com.github.gr.aurora_bookstore.dto.authorDto.AuthorReadDTO;
+import com.github.gr.aurora_bookstore.exception.bookException.AuthorNotFoundException;
 import com.github.gr.aurora_bookstore.model.entity.Author;
 import com.github.gr.aurora_bookstore.model.mapper.AuthorMapper;
 import com.github.gr.aurora_bookstore.repository.AuthorRepository;
@@ -26,7 +27,7 @@ public class AuthorService {
     public AuthorReadDTO findById(Long id) {
         return authorRepository.findById(id)
                 .map(AuthorMapper::toReadDto)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+                .orElseThrow(() -> new AuthorNotFoundException("Author not found with id: " + id));
     }
 
     public AuthorReadDTO create(AuthorCreateDTO dto) {
@@ -37,7 +38,7 @@ public class AuthorService {
 
     public AuthorReadDTO update(Long id, AuthorCreateDTO dto) {
         Author existingAuthor = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+                .orElseThrow(() -> new AuthorNotFoundException("Author not found with id: " + id));
         existingAuthor.setName(dto.getName());
         Author updatedAuthor = authorRepository.save(existingAuthor);
         return AuthorMapper.toReadDto(updatedAuthor);
@@ -45,7 +46,7 @@ public class AuthorService {
 
     public void delete(Long id) {
         if (!authorRepository.existsById(id)) {
-            throw new RuntimeException("Author not found with id: " + id);
+            throw new AuthorNotFoundException("Author not found with id: " + id);
         }
         authorRepository.deleteById(id);
     }

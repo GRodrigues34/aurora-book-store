@@ -8,10 +8,10 @@ import com.github.gr.aurora_bookstore.dto.userDto.LoginDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.LoginResponseDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.dto.userDto.UserRegisterDTO;
+import com.github.gr.aurora_bookstore.exception.userException.UserAlreadyExistsException;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationManager.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,7 +33,7 @@ public class AuthService {
 
     public UserReadDTO register(UserRegisterDTO registerDto) {
         if (userService.existsByEmail(registerDto.getEmail())) {
-            return null;
+            throw new UserAlreadyExistsException("Email already registered: " + registerDto.getEmail());
         } else {
             String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.getPassword());
             registerDto.setPassword(encryptedPassword);

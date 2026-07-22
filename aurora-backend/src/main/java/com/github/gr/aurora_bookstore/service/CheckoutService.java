@@ -1,6 +1,7 @@
 package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.orderDto.OrderReadDTO;
+import com.github.gr.aurora_bookstore.exception.orderException.EmptyCartException;
 import com.github.gr.aurora_bookstore.model.entity.*;
 import com.github.gr.aurora_bookstore.model.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class CheckoutService {
     public OrderReadDTO createOrderFromCart(Long userId, Cart cart) {
         User user = userService.getEntityById(userId);
         if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
-            throw new RuntimeException("Cannot create order from an empty cart");
+            throw new EmptyCartException("Cannot create order from an empty cart");
         }
 
         Orders order = new Orders();

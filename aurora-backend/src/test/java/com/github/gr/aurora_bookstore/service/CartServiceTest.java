@@ -8,6 +8,9 @@ import com.github.gr.aurora_bookstore.model.entity.CartItem;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.repository.CartItemRepository;
 import com.github.gr.aurora_bookstore.repository.CartRepository;
+import com.github.gr.aurora_bookstore.exception.bookException.BookNotFoundException;
+import com.github.gr.aurora_bookstore.exception.cartException.CartItemNotFoundException;
+import com.github.gr.aurora_bookstore.exception.bookException.ResourceNotFoundException;
 import com.github.gr.aurora_bookstore.util.BookTestData;
 import com.github.gr.aurora_bookstore.util.UserTestData;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,7 +102,7 @@ public class CartServiceTest {
         when(cartRepository.findByUserId(user.getId())).thenReturn(null);
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.insertItem(user.getId(), cartInsertDto));
+        assertThrows(ResourceNotFoundException.class, () -> cartService.insertItem(user.getId(), cartInsertDto));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 
@@ -112,10 +115,10 @@ public class CartServiceTest {
         cart.setUser(user);
 
         when(cartRepository.findByUserId(user.getId())).thenReturn(cart);
-        when(bookService.getEntityById(999L)).thenThrow(new RuntimeException("Book not found"));
+        when(bookService.getEntityById(999L)).thenThrow(new BookNotFoundException("Book not found"));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.insertItem(user.getId(), cartInsertDto));
+        assertThrows(BookNotFoundException.class, () -> cartService.insertItem(user.getId(), cartInsertDto));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 
@@ -160,7 +163,7 @@ public class CartServiceTest {
         when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.of(item));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), itemIdToDelete));
+        assertThrows(ResourceNotFoundException.class, () -> cartService.deleteItem(user.getId(), itemIdToDelete));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 
@@ -172,7 +175,7 @@ public class CartServiceTest {
         when(cartItemRepository.findById(itemIdToDelete)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> cartService.deleteItem(user.getId(), itemIdToDelete));
+        assertThrows(CartItemNotFoundException.class, () -> cartService.deleteItem(user.getId(), itemIdToDelete));
         verify(cartRepository, never()).save(any(Cart.class));
     }
 }

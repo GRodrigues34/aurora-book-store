@@ -2,6 +2,7 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.bookDto.BookCreateDTO;
 import com.github.gr.aurora_bookstore.dto.bookDto.BookReadDTO;
+import com.github.gr.aurora_bookstore.exception.bookException.BookNotFoundException;
 import com.github.gr.aurora_bookstore.model.entity.*;
 import com.github.gr.aurora_bookstore.model.mapper.BookMapper;
 import com.github.gr.aurora_bookstore.repository.AuthorRepository;
@@ -34,12 +35,12 @@ public class BookService {
     public BookReadDTO findById(Long id) {
         return bookRepository.findById(id)
                 .map(BookMapper::toReadDto)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
     }
 
     public Book getEntityById(Long id) {
         return bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
     }
 
     public BookReadDTO create(BookCreateDTO dto) {
@@ -54,7 +55,7 @@ public class BookService {
 
     public BookReadDTO update(Long id, BookCreateDTO dto) {
         Book existingBook = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
 
         existingBook.setTitle(dto.getTitle());
         existingBook.setDescription(dto.getDescription());
@@ -72,7 +73,7 @@ public class BookService {
 
     public void delete(Long id) {
         if (!bookRepository.existsById(id)) {
-            throw new RuntimeException("Book not found with id: " + id);
+            throw new BookNotFoundException("Book not found with id: " + id);
         }
         bookRepository.deleteById(id);
     }

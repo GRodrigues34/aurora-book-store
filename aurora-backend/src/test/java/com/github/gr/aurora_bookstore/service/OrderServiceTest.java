@@ -7,6 +7,7 @@ import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.Orders;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.repository.OrderRepository;
+import com.github.gr.aurora_bookstore.exception.orderException.InsufficientStockException;
 import com.github.gr.aurora_bookstore.util.BookTestData;
 import com.github.gr.aurora_bookstore.util.UserTestData;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,7 +102,7 @@ public class OrderServiceTest {
         when(bookService.getEntityById(book.getId())).thenReturn(book);
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> orderService.createOrder(user.getId(), orderCreateDto));
+        assertThrows(InsufficientStockException.class, () -> orderService.createOrder(user.getId(), orderCreateDto));
         verify(orderRepository, never()).save(any(Orders.class));
     }
 

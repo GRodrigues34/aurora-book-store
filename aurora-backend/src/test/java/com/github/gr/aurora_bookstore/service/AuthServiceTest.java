@@ -5,6 +5,7 @@ import com.github.gr.aurora_bookstore.dto.userDto.UserReadDTO;
 import com.github.gr.aurora_bookstore.model.entity.User;
 import com.github.gr.aurora_bookstore.model.enums.UserRole;
 import com.github.gr.aurora_bookstore.util.UserTestData;
+import com.github.gr.aurora_bookstore.exception.userException.UserAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,18 +37,15 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_WhenEmailAlreadyExists_ShouldReturnNull() {
+    void register_WhenEmailAlreadyExists_ShouldThrowException() {
         // Arrange
         UserRegisterDTO dto = new UserRegisterDTO();
         dto.setEmail("test@test.com");
 
         when(userService.existsByEmail("test@test.com")).thenReturn(true);
 
-        // Act
-        UserReadDTO result = authService.register(dto);
-
-        // Assert
-        assertNull(result);
+        // Act & Assert
+        assertThrows(UserAlreadyExistsException.class, () -> authService.register(dto));
         verify(userService, never()).create(any());
     }
 

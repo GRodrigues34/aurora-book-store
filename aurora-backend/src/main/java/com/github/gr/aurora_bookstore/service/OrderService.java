@@ -2,6 +2,8 @@ package com.github.gr.aurora_bookstore.service;
 
 import com.github.gr.aurora_bookstore.dto.orderDto.OrderCreateDTO;
 import com.github.gr.aurora_bookstore.dto.orderDto.OrderReadDTO;
+import com.github.gr.aurora_bookstore.exception.orderException.InsufficientStockException;
+import com.github.gr.aurora_bookstore.exception.orderException.OrderNotFoundException;
 import com.github.gr.aurora_bookstore.model.entity.Book;
 import com.github.gr.aurora_bookstore.model.entity.OrderItem;
 import com.github.gr.aurora_bookstore.model.entity.Orders;
@@ -28,7 +30,7 @@ public class OrderService {
     public OrderItem createProcessedOrderItem(Long bookId, Integer quantity) {
         Book book = bookService.getEntityById(bookId);
         if (book.getStock() < quantity) {
-            throw new RuntimeException("Insufficient stock for book: " + book.getTitle());
+            throw new InsufficientStockException("Insufficient stock for book: " + book.getTitle());
         }
 
         book.setStock(book.getStock() - quantity);
@@ -80,7 +82,7 @@ public class OrderService {
     @Transactional
     public void deleteOrder(Long orderId) {
         Orders order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
         orderRepository.delete(order);
     }
 
