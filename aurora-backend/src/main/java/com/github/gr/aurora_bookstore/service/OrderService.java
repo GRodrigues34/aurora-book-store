@@ -25,33 +25,47 @@ public class OrderService {
     private final BookService bookService;
 
     @Transactional
+    public OrderItem createProcessedOrderItem(Long bookId, Integer quantity) {
+        Book book = bookService.getEntityById(bookId);
+        if (book.getStock() < quantity) {
+            throw new RuntimeException("Insufficient stock for book: " + book.getTitle());
+        }
+
+        book.setStock(book.getStock() - quantity);
+        bookService.save(book);
+
+        BigDecimal itemPrice = book.getPrice();
+        BigDecimal itemTotal = itemPrice.multiply(BigDecimal.valueOf(quantity));
+
+        OrderItem item = new OrderItem();
+        item.setBook(book);
+        item.setQuantity(quantity);
+        item.setItemPrice(itemPrice);
+        item.setTotalPrice(itemTotal);
+
+        return item;
+    }
+
+    @Transactional
     public OrderReadDTO createOrder(Long userId, OrderCreateDTO orderCreateDTO) {
         User user = userService.getEntityById(userId);
         Orders order = OrderMapper.toEntity(orderCreateDTO);
         order.setUser(user);
 
         BigDecimal totalPrice = BigDecimal.ZERO;
+        java.util.Set<OrderItem> processedItems = new java.util.HashSet<>();
+
         if (order.getOrderItems() != null) {
             for (OrderItem item : order.getOrderItems()) {
-                Book book = bookService.getEntityById(item.getBook().getId());
-                if (book.getStock() < item.getQuantity()) {
-                    throw new RuntimeException("Insufficient stock for book: " + book.getTitle());
-                }
-                
-                // Reduce stock
-                book.setStock(book.getStock() - item.getQuantity());
-
-                BigDecimal itemPrice = book.getPrice();
-                BigDecimal itemTotal = itemPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-
-                item.setItemPrice(itemPrice);
-                item.setTotalPrice(itemTotal);
-                item.setBook(book);
-
-                totalPrice = totalPrice.add(itemTotal);
+                OrderItem processedItem = createProcessedOrderItem(item.getBook().getId(), item.getQuantity());
+                processedItem.setOrder(order);
+                processedItems.add(processedItem);
+                totalPrice = totalPrice.add(processedItem.getTotalPrice());
             }
         }
+        order.setOrderItems(processedItems);
         order.setTotalPrice(totalPrice);
+
         Orders savedOrder = orderRepository.save(order);
         return OrderMapper.toReadDto(savedOrder);
     }
@@ -68,5 +82,9 @@ public class OrderService {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
         orderRepository.delete(order);
+    }
+
+    public Orders save(Orders order) {
+        return orderRepository.save(order);
     }
 }

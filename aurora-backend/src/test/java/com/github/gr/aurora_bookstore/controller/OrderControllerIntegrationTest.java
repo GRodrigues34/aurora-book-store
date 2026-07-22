@@ -44,6 +44,9 @@ class OrderControllerIntegrationTest {
     @MockitoBean
     private OrderService orderService;
 
+    @MockitoBean
+    private com.github.gr.aurora_bookstore.service.CheckoutService checkoutService;
+
     private User validUser;
     private String token;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -78,6 +81,23 @@ class OrderControllerIntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void checkout_WithoutToken_ShouldReturn403() throws Exception {
+        mockMvc.perform(post("/api/orders/checkout")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void checkout_WithValidToken_ShouldReturn201() throws Exception {
+        when(checkoutService.checkout(10L)).thenReturn(new OrderReadDTO());
+
+        mockMvc.perform(post("/api/orders/checkout")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
     }
 

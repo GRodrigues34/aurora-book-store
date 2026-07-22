@@ -19,11 +19,18 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final com.github.gr.aurora_bookstore.service.CheckoutService checkoutService;
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrderReadDTO> createOrder(@RequestBody OrderCreateDTO dto, @AuthenticationPrincipal User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(user.getId(), dto));
+    }
+
+    @PostMapping("/checkout")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<OrderReadDTO> checkout(@AuthenticationPrincipal User user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(checkoutService.checkout(user.getId()));
     }
 
     @GetMapping

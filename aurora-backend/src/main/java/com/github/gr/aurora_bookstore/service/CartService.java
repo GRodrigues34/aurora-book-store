@@ -58,7 +58,6 @@ public class CartService {
             throw new RuntimeException("Cart not found");
         }
 
-        // Verify that the cart belongs to the requesting user
         if (!cart.getUser().getId().equals(userId)) {
             throw new RuntimeException("Access denied: This cart item does not belong to you.");
         }
@@ -66,5 +65,19 @@ public class CartService {
         cart.getCartItems().remove(item);
         cartRepository.save(cart);
         return CartMapper.toCartReadDto(cart);
+    }
+
+    public Cart getEntityByUserId(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId);
+        if (cart == null) {
+            throw new RuntimeException("Cart not found");
+        }
+        return cart;
+    }
+
+    public void clearCart(Long userId) {
+        Cart cart = getEntityByUserId(userId);
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
     }
 }

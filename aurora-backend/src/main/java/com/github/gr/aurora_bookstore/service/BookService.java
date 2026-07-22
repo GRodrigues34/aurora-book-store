@@ -77,6 +77,10 @@ public class BookService {
         bookRepository.deleteById(id);
     }
 
+    public Book save(Book book) {
+        return bookRepository.save(book);
+    }
+
     private Set<Author> resolveAuthors(Set<Long> ids) {
         if (ids == null || ids.isEmpty()) return new HashSet<>();
         return new HashSet<>(authorRepository.findAllById(ids));
