@@ -1,5 +1,0 @@
-ALTER TABLE book ALTER COLUMN price DECIMAL(10,2);
-ALTER TABLE orders ALTER COLUMN total_price DECIMAL(10,2);
-ALTER TABLE order_item ALTER COLUMN item_price DECIMAL(10,2);
-ALTER TABLE order_item ALTER COLUMN total_price DECIMAL(10,2);
-

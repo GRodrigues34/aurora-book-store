@@ -16,7 +16,7 @@ CREATE TABLE cart_item(
 CREATE TABLE orders(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    total_price FLOAT NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -26,8 +26,8 @@ CREATE TABLE order_item(
     order_id BIGINT NOT NULL,
     book_id BIGINT NOT NULL,
     quantity INT NOT NULL,
-    item_price FLOAT NOT NULL,
-    total_price FLOAT NOT NULL,
+    item_price DECIMAL(10,2) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (book_id) REFERENCES book(id)
 );
