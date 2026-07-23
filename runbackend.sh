@@ -18,5 +18,12 @@ echo "Compilando o backend..."
 cd /home/gr/aurora-book-store/aurora-backend
 mvn clean install -DskipTests
 
+echo "Aguardando o MySQL estar pronto na porta 3307..."
+until docker exec aurora_mysql mysqladmin ping -h"localhost" -u"root" -p"root" &>/dev/null; do
+    echo -n "."
+    sleep 1
+done
+echo " MySQL está pronto!"
+
 echo "Iniciando o Spring Boot..."
 mvn spring-boot:run

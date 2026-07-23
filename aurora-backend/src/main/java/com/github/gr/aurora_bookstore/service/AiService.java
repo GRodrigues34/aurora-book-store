@@ -48,8 +48,8 @@ public class AiService {
             UserService userService,
             VectorStore vectorStore,
             BorealTools borealTools) {
-        this.baseChatClient = chatClientBuilder.build();
-        this.toolsChatClient = chatClientBuilder.defaultTools(borealTools).build();
+        this.baseChatClient = chatClientBuilder.clone().build();
+        this.toolsChatClient = chatClientBuilder.clone().defaultTools(borealTools).build();
 
         this.chatMessageRepository = chatMessageRepository;
         this.userService = userService;
