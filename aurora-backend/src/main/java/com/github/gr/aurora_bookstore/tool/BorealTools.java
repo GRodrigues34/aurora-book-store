@@ -92,8 +92,10 @@ public class BorealTools {
         String categories = listCategories();
         String genres = listGenres();
         String authors = listAuthors();
-        return "Available Categories: " + categories + "\nAvailable Genres: " + genres + "\nAvailable Authors: "
+        String result = "Available Categories:" + categories + "\nAvailable Genres:" + genres + "\nAvailable Authors:"
                 + authors;
+        log.info("TOOL GET ALL CATEGORIES, GENRES AND AUTHORS RETURNED:\n{}", result);
+        return result;
     }
 
     @Tool(description = "Get all books in the catalog.")
@@ -101,9 +103,13 @@ public class BorealTools {
         log.info("CALLED TOOL GET ALL BOOKS");
         List<Book> books = bookRepository.findAll();
         if (books.isEmpty()) {
-            return "No books found in the catalog.";
+            String result = "No books found in the catalog.";
+            log.info("TOOL GET ALL BOOKS RETURNED: {}", result);
+            return result;
         }
-        return formatBooks(books);
+        String result = formatBooks(books);
+        log.info("TOOL GET ALL BOOKS RETURNED:\n{}", result);
+        return result;
     }
 
     public String searchByCategory(String category) {
@@ -149,8 +155,8 @@ public class BorealTools {
             return "No categories found in the catalog.";
         }
         return categories.stream()
-                .map(Category::getName)
-                .collect(Collectors.joining(", "));
+                .map(c -> "\n- " + c.getName())
+                .collect(Collectors.joining());
     }
 
     public String listGenres() {
@@ -160,8 +166,8 @@ public class BorealTools {
             return "No genres found in the catalog.";
         }
         return genres.stream()
-                .map(Genre::getName)
-                .collect(Collectors.joining(", "));
+                .map(g -> "\n- " + g.getName())
+                .collect(Collectors.joining());
     }
 
     public String listAuthors() {
@@ -171,8 +177,8 @@ public class BorealTools {
             return "No authors found in the catalog.";
         }
         return authors.stream()
-                .map(Author::getName)
-                .collect(Collectors.joining(", "));
+                .map(a -> "\n- " + a.getName())
+                .collect(Collectors.joining());
     }
 
     private String normalize(String input) {

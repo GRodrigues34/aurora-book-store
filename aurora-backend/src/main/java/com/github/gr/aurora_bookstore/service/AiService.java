@@ -64,6 +64,16 @@ public class AiService {
                 combinedSystemText = systemText + "\n\n" + extraInstructions;
             }
 
+            log.info("--- AI PROMPT CONFIGURATION ---");
+            log.info("System Prompt length: {}", combinedSystemText.length());
+            log.info("System Prompt:\n{}", combinedSystemText);
+            log.info("History size (messages): {}", messages.size());
+            for (int i = 0; i < messages.size(); i++) {
+                Message msg = messages.get(i);
+                log.info("Message {}: [Role: {}] Content: '{}'", i, msg.getMessageType(), msg.getText());
+            }
+            log.info("-------------------------------");
+
             return client.prompt()
                     .system(combinedSystemText)
                     .messages(messages)
@@ -155,16 +165,27 @@ public class AiService {
 
         log.info("SENDING REQUEST TO BOREAL");
         return processUserMessage(currentClient, history, extraInstructions)
-                .doOnNext(chunk -> fullAiResponse.append(chunk))
+                .doOnSubscribe(sub -> log.info("AI Flux: Subscribed and starting stream processing"))
+                .doOnNext(chunk -> {
+                    log.info("AI Flux: Chunk received: '{}'", chunk);
+                    fullAiResponse.append(chunk);
+                })
                 .doOnComplete(() -> {
+                    log.info("AI Flux: Stream completed. Full accumulated response: '{}'", fullAiResponse.toString());
+                    if (fullAiResponse.isEmpty()) {
+                        log.warn("AI Flux: Warning - Stream completed but accumulated response is EMPTY");
+                    }
                     saveChatMessage(fullAiResponse.toString(), userId, "ai");
                 })
+                .doOnError(e -> {
+                    log.error("AI Flux: Error emitted in stream", e);
+                })
                 // REACTIVE GUARDRAIL: If an error occurs or returns empty, the flow is captured
-                .defaultIfEmpty("Desculpe, tive um lapso de memória! Pode repetir a pergunta?")
+                .defaultIfEmpty("Sorry, I had a memory lapse! Could you repeat the question?")
                 .onErrorResume(e -> {
-                    log.error("Error in AI Stream", e);
+                    log.error("Error in AI Stream fallback", e);
                     return Flux
-                            .just("Desculpe, ocorreu um erro técnico ao processar sua mensagem. Pode tentar de novo?");
+                            .just("Sorry, a technical error occurred while processing your message. Could you try again?");
                 });
     }
 }
