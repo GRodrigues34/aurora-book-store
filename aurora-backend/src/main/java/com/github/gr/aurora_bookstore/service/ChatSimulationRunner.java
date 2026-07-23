@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * app,
  * basta comentar a anotação @Component abaixo.
  */
-@Profile("!test")
+@Profile("simulation")
 @Component
 @RequiredArgsConstructor
 public class ChatSimulationRunner implements CommandLineRunner {

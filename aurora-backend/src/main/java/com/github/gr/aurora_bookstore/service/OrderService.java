@@ -83,6 +83,13 @@ public class OrderService {
     public void deleteOrder(Long orderId) {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+        if (order.getOrderItems() != null) {
+            for (OrderItem item : order.getOrderItems()) {
+                Book book = item.getBook();
+                book.setStock(book.getStock() + item.getQuantity());
+                bookService.save(book);
+            }
+        }
         orderRepository.delete(order);
     }
 

@@ -37,12 +37,22 @@ public class CartService {
 
         Book book = bookService.getEntityById(itemDto.bookId());
 
-        CartItem item = new CartItem();
-        item.setBook(book);
-        item.setQuantity(itemDto.quantity());
-        item.setCart(cart);
+        // Check if the item already exists in the cart
+        CartItem existingItem = cart.getCartItems().stream()
+                .filter(item -> item.getBook().getId().equals(itemDto.bookId()))
+                .findFirst()
+                .orElse(null);
 
-        cart.getCartItems().add(item);
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + itemDto.quantity());
+        } else {
+            CartItem item = new CartItem();
+            item.setBook(book);
+            item.setQuantity(itemDto.quantity());
+            item.setCart(cart);
+            cart.getCartItems().add(item);
+        }
+
         cartRepository.save(cart);
         return CartMapper.toCartReadDto(cart);
     }
