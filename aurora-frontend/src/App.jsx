@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './i18n/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import BorealFAB from './components/ui/BorealFAB';
@@ -8,27 +10,34 @@ import BooksPage from './pages/BooksPage';
 import AuthorsPage from './pages/AuthorsPage';
 import PublishPage from './pages/PublishPage';
 import ContactPage from './pages/ContactPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   return (
     <BrowserRouter>
       <LanguageProvider>
-        <div className="min-h-screen flex flex-col bg-white">
-          <Header />
+        <AuthProvider>
+          <Toaster position="top-right" />
+          <div className="min-h-screen flex flex-col bg-white">
+            <Header />
 
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/books" element={<BooksPage />} />
-              <Route path="/authors" element={<AuthorsPage />} />
-              <Route path="/publish" element={<PublishPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-            </Routes>
-          </main>
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/books" element={<BooksPage />} />
+                <Route path="/authors" element={<AuthorsPage />} />
+                <Route path="/publish" element={<PublishPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+              </Routes>
+            </main>
 
-          <Footer />
-          <BorealFAB />
-        </div>
+            <Footer />
+            <BorealFAB />
+          </div>
+        </AuthProvider>
       </LanguageProvider>
     </BrowserRouter>
   );

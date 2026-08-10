@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, Menu, X, Globe } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import auroraLogo from '../../assets/aurora-logo.png';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { language, toggleLanguage, t } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
 
   const navLinks = [
@@ -24,12 +26,10 @@ export default function Header() {
       <div className="section-container">
         <div className="flex items-center justify-between h-16 lg:h-20">
 
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-3 flex-shrink-0">
             <img src={auroraLogo} alt="Aurora Bookstore" className="h-9 w-auto" />
           </Link>
 
-          {/* Center: Search Bar (hidden on mobile) */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -41,7 +41,6 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Right: Nav Links (desktop) */}
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map(link => (
               <Link
@@ -57,7 +56,37 @@ export default function Header() {
               </Link>
             ))}
 
-            {/* Language Toggle */}
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/orders"
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    isActive('/orders')
+                      ? 'text-aurora-700 bg-aurora-50'
+                      : 'text-slate-600 hover:text-aurora-700 hover:bg-slate-50'
+                  }`}
+                >
+                  {t('orders.title')}
+                </Link>
+                <span className="px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg max-w-[150px] truncate">
+                  {user?.email?.split('@')[0]}
+                </span>
+                <button
+                  onClick={logout}
+                  className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                >
+                  {t('auth.logoutBtn')}
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="px-4 py-2 text-sm font-medium text-white bg-aurora-700 hover:bg-aurora-800 rounded-full transition-all duration-200 shadow-sm ml-2"
+              >
+                {t('auth.entrar')}
+              </Link>
+            )}
+
             <button
               onClick={toggleLanguage}
               className="ml-2 flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-500 hover:text-aurora-700 rounded-lg hover:bg-slate-50 transition-all duration-200"
@@ -68,7 +97,6 @@ export default function Header() {
             </button>
           </nav>
 
-          {/* Mobile: Language + Hamburger */}
           <div className="flex items-center gap-2 lg:hidden">
             <button
               onClick={toggleLanguage}
@@ -89,11 +117,9 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-t border-slate-100 animate-fade-in">
           <div className="section-container py-4 space-y-1">
-            {/* Mobile Search */}
             <div className="relative mb-3 md:hidden">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
@@ -116,6 +142,39 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/orders"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    isActive('/orders')
+                      ? 'text-aurora-700 bg-aurora-50'
+                      : 'text-slate-600 hover:text-aurora-700 hover:bg-slate-50'
+                  }`}
+                >
+                  {t('orders.title')}
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                >
+                  {t('auth.logoutBtn')} ({user?.email?.split('@')[0]})
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2.5 text-sm font-medium text-aurora-700 hover:bg-aurora-50 rounded-lg transition-all duration-200"
+              >
+                {t('auth.entrar')}
+              </Link>
+            )}
           </div>
         </div>
       )}
