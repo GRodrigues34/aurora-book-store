@@ -1,11 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { authors, getBooksByAuthor } from '../data/mockData';
+import { getAuthors, getBooks } from '../services/catalog';
 
 export default function AuthorsPage() {
   const { t } = useLanguage();
   const [expandedAuthor, setExpandedAuthor] = useState(null);
+  const [authors, setAuthors] = useState([]);
+  const [books, setBooks] = useState([]);
+
+  useEffect(() => {
+    Promise.all([getAuthors(), getBooks()])
+      .then(([authorsData, booksData]) => {
+        if (authorsData) setAuthors(authorsData);
+        if (booksData) setBooks(booksData);
+      })
+      .catch(error => console.error(error));
+  }, []);
+
+  const getBooksByAuthor = (authorId) => {
+    return books.filter(book => book.authors.some(a => a.id === authorId));
+  };
 
   const toggleAuthor = (authorId) => {
     setExpandedAuthor(prev => (prev === authorId ? null : authorId));

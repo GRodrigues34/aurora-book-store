@@ -13,6 +13,9 @@ export default function BookCard({ book }) {
           alt={book.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=400';
+          }}
         />
         {/* Stock Badge */}
         <div className="absolute top-3 right-3">

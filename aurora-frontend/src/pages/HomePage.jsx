@@ -1,12 +1,23 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Users, Sparkles } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { books } from '../data/mockData';
+import { getBooks } from '../services/catalog';
+import { useState, useEffect } from 'react';
 import BookCard from '../components/ui/BookCard';
 
 export default function HomePage() {
   const { t } = useLanguage();
-  const featuredBooks = books.slice(0, 3);
+  const [featuredBooks, setFeaturedBooks] = useState([]);
+
+  useEffect(() => {
+    getBooks()
+      .then(data => {
+        if (data) {
+          setFeaturedBooks(data.slice(0, 3));
+        }
+      })
+      .catch(error => console.error(error));
+  }, []);
 
   return (
     <div className="page-enter">

@@ -1,14 +1,29 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Filter, X } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { books, categories, genres, authors } from '../data/mockData';
+import { getBooks, getCategories, getGenres, getAuthors } from '../services/catalog';
 import BookCard from '../components/ui/BookCard';
 
 export default function BooksPage() {
   const { t } = useLanguage();
+  const [books, setBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [selectedAuthor, setSelectedAuthor] = useState(null);
+
+  useEffect(() => {
+    Promise.all([getBooks(), getCategories(), getGenres(), getAuthors()])
+      .then(([booksData, categoriesData, genresData, authorsData]) => {
+        if (booksData) setBooks(booksData);
+        if (categoriesData) setCategories(categoriesData);
+        if (genresData) setGenres(genresData);
+        if (authorsData) setAuthors(authorsData);
+      })
+      .catch(error => console.error(error));
+  }, []);
 
   const hasFilters = selectedCategory || selectedGenre || selectedAuthor;
 
@@ -19,7 +34,7 @@ export default function BooksPage() {
       if (selectedAuthor && !book.authors.some(a => a.id === selectedAuthor)) return false;
       return true;
     });
-  }, [selectedCategory, selectedGenre, selectedAuthor]);
+  }, [books, selectedCategory, selectedGenre, selectedAuthor]);
 
   const clearFilters = () => {
     setSelectedCategory(null);
