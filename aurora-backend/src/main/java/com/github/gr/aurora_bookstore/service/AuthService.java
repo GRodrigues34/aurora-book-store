@@ -26,6 +26,9 @@ public class AuthService {
     UserService userService;
 
     @Autowired
+    CartService cartService;
+
+    @Autowired
     AuthenticationManager authenticationManager;
 
     @org.springframework.beans.factory.annotation.Value("${api.security.token.secret}")
@@ -38,7 +41,10 @@ public class AuthService {
             String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.getPassword());
             registerDto.setPassword(encryptedPassword);
             registerDto.setRole(com.github.gr.aurora_bookstore.model.enums.UserRole.USER);
-            return userService.create(registerDto);
+            UserReadDTO userReadDto = userService.create(registerDto);
+            User user = userService.getEntityById(userReadDto.getId());
+            cartService.create(user);
+            return userReadDto;
         }
     }
 

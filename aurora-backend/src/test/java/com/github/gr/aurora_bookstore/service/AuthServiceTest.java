@@ -29,6 +29,9 @@ class AuthServiceTest {
     private UserService userService;
 
     @Mock
+    private CartService cartService;
+
+    @Mock
     private AuthenticationManager authenticationManager;
 
     @BeforeEach
@@ -64,8 +67,11 @@ class AuthServiceTest {
         expectedUser.setEmail("test@test.com");
         expectedUser.setRole("USER");
 
+        User userEntity = UserTestData.createValidUserUser();
+
         when(userService.existsByEmail("test@test.com")).thenReturn(false);
         when(userService.create(any(UserRegisterDTO.class))).thenReturn(expectedUser);
+        when(userService.getEntityById(1L)).thenReturn(userEntity);
 
         // Act
         UserReadDTO result = authService.register(dto);
@@ -78,6 +84,7 @@ class AuthServiceTest {
         // Note: bcrypt usually generates hash starting with $2a$
         assertTrue(dto.getPassword().startsWith("$2a$"));
         verify(userService, times(1)).create(any());
+        verify(cartService, times(1)).create(userEntity);
     }
 
     @Test

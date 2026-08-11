@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Globe } from 'lucide-react';
+import { Search, Menu, X, Globe, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import auroraLogo from '../../assets/aurora-logo.png';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { language, toggleLanguage, t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
+  const { totalItems, toggleCart } = useCart();
   const location = useLocation();
 
   const navLinks = [
@@ -88,6 +90,19 @@ export default function Header() {
             )}
 
             <button
+              onClick={toggleCart}
+              className="relative flex items-center justify-center p-2 text-slate-600 hover:text-aurora-700 hover:bg-slate-50 rounded-lg transition-all duration-200 ml-2"
+              aria-label="Open shopping cart"
+            >
+              <ShoppingBag size={20} />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-aurora-600 text-white text-[10px] font-bold flex items-center justify-center border border-white">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+
+            <button
               onClick={toggleLanguage}
               className="ml-2 flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-500 hover:text-aurora-700 rounded-lg hover:bg-slate-50 transition-all duration-200"
               aria-label="Toggle language"
@@ -98,6 +113,19 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-2 lg:hidden">
+            <button
+              onClick={toggleCart}
+              className="relative flex items-center justify-center p-2 text-slate-600 hover:text-aurora-700 rounded-lg transition-colors mr-1"
+              aria-label="Open shopping cart"
+            >
+              <ShoppingBag size={20} />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-aurora-600 text-white text-[9px] font-bold flex items-center justify-center border border-white">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-1 px-2 py-2 text-slate-500 hover:text-aurora-700 rounded-lg transition-colors"
