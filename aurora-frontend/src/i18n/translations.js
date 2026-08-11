@@ -140,6 +140,14 @@ export const translations = {
       status: 'Status',
       completed: 'Completed',
     },
+    chat: {
+      title: 'Boreal AI',
+      placeholder: 'Ask about authors, books or recommendations...',
+      empty: 'Hello! Which book are we looking for today?',
+      loginRequired: 'Please sign in to chat with Boreal AI.',
+      loadHistory: 'Load previous conversations',
+      loadingHistory: 'Loading history...',
+    },
   },
 
   pt: {
@@ -282,6 +290,14 @@ export const translations = {
       empty: 'Você ainda não fez nenhum pedido.',
       status: 'Status',
       completed: 'Concluído',
+    },
+    chat: {
+      title: 'Boreal AI',
+      placeholder: 'Pergunte sobre autores, livros ou recomendações...',
+      empty: 'Olá! Qual livro estamos procurando hoje?',
+      loginRequired: 'Por favor, faça login para conversar com o Boreal AI.',
+      loadHistory: 'Carregar conversas anteriores',
+      loadingHistory: 'Carregando histórico...',
     },
   },
 };
