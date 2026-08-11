@@ -3,20 +3,29 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { X, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { checkoutCart } from '../../services/order';
 import toast from 'react-hot-toast';
 
 export default function CartDrawer() {
-  const { cart, isOpen, toggleCart, removeItem, totalPrice } = useCart();
+  const { cart, isOpen, toggleCart, removeItem, totalPrice, fetchCart } = useCart();
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const handleCheckoutClick = () => {
+  const handleCheckoutClick = async () => {
     if (!isAuthenticated) {
       toggleCart();
       navigate('/login');
     } else {
-      toast.success('Proceeding to checkout...');
+      try {
+        await checkoutCart();
+        toast.success('Order placed successfully!');
+        await fetchCart();
+        toggleCart();
+        navigate('/orders');
+      } catch (error) {
+        toast.error('Failed to place order');
+      }
     }
   };
 

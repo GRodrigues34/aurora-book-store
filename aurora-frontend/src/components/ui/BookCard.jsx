@@ -3,6 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
+import { createOrder } from '../../services/order';
 import toast from 'react-hot-toast';
 
 export default function BookCard({ book }) {
@@ -25,6 +26,29 @@ export default function BookCard({ book }) {
       toggleCart();
     } catch (error) {
       toast.error('Failed to add item to cart');
+    }
+  };
+
+  const handleBuyNow = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const dto = {
+        orderItems: [
+          {
+            bookId: book.id,
+            quantity: 1
+          }
+        ]
+      };
+      await createOrder(dto);
+      toast.success('Purchase completed successfully!');
+      navigate('/orders');
+    } catch (error) {
+      toast.error('Failed to complete purchase');
     }
   };
 
@@ -69,18 +93,27 @@ export default function BookCard({ book }) {
 
         <p className="text-sm text-slate-500 mb-3">{authorNames}</p>
 
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-4 gap-2">
           <p className="text-lg font-bold text-aurora-700">
             R$ {book.price.toFixed(2).replace('.', ',')}
           </p>
-          <button
-            onClick={handleAddToCart}
-            disabled={book.stock <= 0}
-            className="p-2 bg-aurora-50 hover:bg-aurora-100 text-aurora-700 disabled:bg-slate-100 disabled:text-slate-400 rounded-full transition-colors duration-200"
-            aria-label="Add to cart"
-          >
-            <ShoppingBag size={16} />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleAddToCart}
+              disabled={book.stock <= 0}
+              className="p-2 bg-aurora-50 hover:bg-aurora-100 text-aurora-700 disabled:bg-slate-100 disabled:text-slate-400 rounded-full transition-colors duration-200"
+              title={t('cart.addBtn')}
+            >
+              <ShoppingBag size={16} />
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={book.stock <= 0}
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-aurora-600 hover:bg-aurora-700 disabled:bg-slate-100 disabled:text-slate-400 rounded-full transition-colors duration-200"
+            >
+              {t('cart.buyNow')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
