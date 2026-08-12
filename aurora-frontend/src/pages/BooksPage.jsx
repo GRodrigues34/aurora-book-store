@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getBooks, getCategories, getGenres, getAuthors } from '../services/catalog';
 import BookCard from '../components/ui/BookCard';
@@ -57,20 +57,6 @@ export default function BooksPage() {
     setSearchParams({});
   };
 
-  const FilterPill = ({ label, value, selected, onSelect }) => (
-    <button
-      onClick={() => onSelect(selected ? null : value)}
-      className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
-        selected
-          ? 'bg-aurora-700 text-white shadow-sm'
-          : 'bg-white text-slate-600 border border-slate-200 hover:border-aurora-300 hover:text-aurora-700'
-      }`}
-    >
-      {label}
-      {selected && <X size={12} />}
-    </button>
-  );
-
   return (
     <div className="page-enter">
       <div className="section-container py-12 sm:py-16">
@@ -86,84 +72,59 @@ export default function BooksPage() {
         </div>
 
         {/* Filter Bar */}
-        <div className="mb-10 space-y-4">
-          {/* Categories */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[90px]">
-              <Filter size={14} />
-              Category
-            </div>
-            <FilterPill
-              label={t('books.allCategories')}
-              value={null}
-              selected={selectedCategory === null}
-              onSelect={() => setSelectedCategory(null)}
-            />
-            {categories.map(cat => (
-              <FilterPill
-                key={cat.id}
-                label={cat.name}
-                value={cat.id}
-                selected={selectedCategory === cat.id}
-                onSelect={setSelectedCategory}
-              />
-            ))}
-          </div>
-
-          {/* Genres */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[90px]">
-              <Filter size={14} />
-              Genre
-            </div>
-            <FilterPill
-              label={t('books.allGenres')}
-              value={null}
-              selected={selectedGenre === null}
-              onSelect={() => setSelectedGenre(null)}
-            />
-            {genres.map(genre => (
-              <FilterPill
-                key={genre.id}
-                label={genre.name}
-                value={genre.id}
-                selected={selectedGenre === genre.id}
-                onSelect={setSelectedGenre}
-              />
-            ))}
-          </div>
-
-          {/* Authors */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider min-w-[90px]">
-              <Filter size={14} />
-              Author
-            </div>
-            <FilterPill
-              label={t('books.allAuthors')}
-              value={null}
-              selected={selectedAuthor === null}
-              onSelect={() => setSelectedAuthor(null)}
-            />
-            {authors.map(author => (
-              <FilterPill
-                key={author.id}
-                label={author.name}
-                value={author.id}
-                selected={selectedAuthor === author.id}
-                onSelect={setSelectedAuthor}
-              />
-            ))}
-          </div>
-
-          {/* Clear All */}
-          {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="text-sm text-aurora-600 hover:text-aurora-800 font-medium transition-colors"
+        <div className="flex flex-col sm:flex-row items-center gap-4 flex-wrap bg-slate-50 p-6 rounded-2xl border border-slate-200/60 mb-10">
+          <div className="flex flex-col w-full sm:w-auto min-w-[180px]">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category</label>
+            <select
+              value={selectedCategory || ''}
+              onChange={(e) => setSelectedCategory(e.target.value ? parseInt(e.target.value) : null)}
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 focus:outline-none focus:border-aurora-500 focus:ring-2 focus:ring-aurora-500/20"
             >
-              {t('books.clearFilters')}
-            </button>
+              <option value="">{t('books.allCategories')}</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col w-full sm:w-auto min-w-[180px]">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Genre</label>
+            <select
+              value={selectedGenre || ''}
+              onChange={(e) => setSelectedGenre(e.target.value ? parseInt(e.target.value) : null)}
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 focus:outline-none focus:border-aurora-500 focus:ring-2 focus:ring-aurora-500/20"
+            >
+              <option value="">{t('books.allGenres')}</option>
+              {genres.map(genre => (
+                <option key={genre.id} value={genre.id}>{genre.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col w-full sm:w-auto min-w-[180px]">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Author</label>
+            <select
+              value={selectedAuthor || ''}
+              onChange={(e) => setSelectedAuthor(e.target.value ? parseInt(e.target.value) : null)}
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 focus:outline-none focus:border-aurora-500 focus:ring-2 focus:ring-aurora-500/20"
+            >
+              <option value="">{t('books.allAuthors')}</option>
+              {authors.map(author => (
+                <option key={author.id} value={author.id}>{author.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {hasFilters && (
+            <div className="flex items-end h-full sm:mt-6">
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-all duration-200"
+              >
+                <X size={16} />
+                {t('books.clearFilters')}
+              </button>
+            </div>
           )}
         </div>
 

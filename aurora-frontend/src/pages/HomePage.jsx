@@ -4,6 +4,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { getBooks } from '../services/catalog';
 import { useState, useEffect } from 'react';
 import BookCard from '../components/ui/BookCard';
+import auroraLogo from '../assets/aurora-logo.png';
 
 export default function HomePage() {
   const { t } = useLanguage();
@@ -29,11 +30,11 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-aurora-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-200/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-        <div className="section-container relative py-24 sm:py-32 lg:py-40">
+        <div className="section-container relative py-12 sm:py-16 lg:py-10">
           <div className="max-w-3xl mx-auto text-center">
             {/* Accent line */}
-            <div className="flex justify-center mb-8">
-              <div className="h-1 w-16 rounded-full bg-gradient-to-r from-aurora-500 to-emerald-400" />
+            <div className="flex justify-center -mb-[35px] md:-mb-[110px]">
+              <img src={auroraLogo} alt="Aurora Bookstore Logo" className="h-[220px] md:h-[500px] w-auto" />
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">

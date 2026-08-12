@@ -38,7 +38,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 lg:h-20">
 
           <Link to="/" className="flex items-center gap-3 flex-shrink-0">
-            <img src={auroraLogo} alt="Aurora Bookstore" className="h-9 w-auto" />
+            <img src={auroraLogo} alt="Aurora Bookstore" className="h-[60px] lg:h-[125px] w-auto" />
           </Link>
 
           <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-md mx-8">
@@ -119,7 +119,7 @@ export default function Header() {
               aria-label="Toggle language"
             >
               <Globe size={16} />
-              <span className="uppercase text-xs font-semibold tracking-wider">{language === 'en' ? 'PT' : 'EN'}</span>
+              <span className="uppercase text-xs font-semibold tracking-wider">{language === 'en' ? 'EN' : 'PT'}</span>
             </button>
           </nav>
 
@@ -143,7 +143,7 @@ export default function Header() {
               aria-label="Toggle language"
             >
               <Globe size={18} />
-              <span className="uppercase text-xs font-semibold">{language === 'en' ? 'PT' : 'EN'}</span>
+              <span className="uppercase text-xs font-semibold">{language === 'en' ? 'EN' : 'PT'}</span>
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
