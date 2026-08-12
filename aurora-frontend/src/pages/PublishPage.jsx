@@ -1,60 +1,191 @@
-import { useState, useRef } from 'react';
-import { Upload, FileText, X, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, X, Loader2, BookOpen } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { getAuthors, getCategories, getGenres } from '../services/catalog';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 export default function PublishPage() {
   const { t } = useLanguage();
-  const [file, setFile] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const fileInputRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [stock, setStock] = useState('');
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
+  const [availableAuthors, setAvailableAuthors] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [availableGenres, setAvailableGenres] = useState([]);
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile?.type === 'application/pdf') {
-      setFile(droppedFile);
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+
+  const [newAuthorName, setNewAuthorName] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newGenreName, setNewGenreName] = useState('');
+
+  const loadTaxonomies = async () => {
+    try {
+      const [authors, categories, genres] = await Promise.all([
+        getAuthors(),
+        getCategories(),
+        getGenres()
+      ]);
+      setAvailableAuthors(authors || []);
+      setAvailableCategories(categories || []);
+      setAvailableGenres(genres || []);
+    } catch (error) {
+      toast.error('Failed to load catalog data');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleFileSelect = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
+  useEffect(() => {
+    loadTaxonomies();
+  }, []);
+
+  const handleSelectAuthor = (e) => {
+    const authorId = parseInt(e.target.value);
+    if (!authorId) return;
+    const author = availableAuthors.find(a => a.id === authorId);
+    if (author && !selectedAuthors.some(a => a.id === author.id)) {
+      setSelectedAuthors([...selectedAuthors, author]);
+    }
+    e.target.value = '';
+  };
+
+  const handleAddNewAuthor = () => {
+    if (!newAuthorName.trim()) return;
+    if (!selectedAuthors.some(a => a.name.toLowerCase() === newAuthorName.trim().toLowerCase())) {
+      setSelectedAuthors([...selectedAuthors, { name: newAuthorName.trim(), isNew: true }]);
+    }
+    setNewAuthorName('');
+  };
+
+  const handleSelectCategory = (e) => {
+    const categoryId = parseInt(e.target.value);
+    if (!categoryId) return;
+    const category = availableCategories.find(c => c.id === categoryId);
+    if (category && !selectedCategories.some(c => c.id === category.id)) {
+      setSelectedCategories([...selectedCategories, category]);
+    }
+    e.target.value = '';
+  };
+
+  const handleAddNewCategory = () => {
+    if (!newCategoryName.trim()) return;
+    if (!selectedCategories.some(c => c.name.toLowerCase() === newCategoryName.trim().toLowerCase())) {
+      setSelectedCategories([...selectedCategories, { name: newCategoryName.trim(), isNew: true }]);
+    }
+    setNewCategoryName('');
+  };
+
+  const handleSelectGenre = (e) => {
+    const genreId = parseInt(e.target.value);
+    if (!genreId) return;
+    const genre = availableGenres.find(g => g.id === genreId);
+    if (genre && !selectedGenres.some(g => g.id === genre.id)) {
+      setSelectedGenres([...selectedGenres, genre]);
+    }
+    e.target.value = '';
+  };
+
+  const handleAddNewGenre = () => {
+    if (!newGenreName.trim()) return;
+    if (!selectedGenres.some(g => g.name.toLowerCase() === newGenreName.trim().toLowerCase())) {
+      setSelectedGenres([...selectedGenres, { name: newGenreName.trim(), isNew: true }]);
+    }
+    setNewGenreName('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (selectedAuthors.length === 0) {
+      toast.error('Please select or create at least one author');
+      return;
+    }
+    if (selectedCategories.length === 0) {
+      toast.error('Please select or create at least one category');
+      return;
+    }
+    if (selectedGenres.length === 0) {
+      toast.error('Please select or create at least one genre');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const authorPromises = selectedAuthors.map(async (author) => {
+        if (author.isNew) {
+          const res = await api.post('/api/authors', { name: author.name });
+          return res.id;
+        }
+        return author.id;
+      });
+
+      const categoryPromises = selectedCategories.map(async (category) => {
+        if (category.isNew) {
+          const res = await api.post('/api/categories', { name: category.name });
+          return res.id;
+        }
+        return category.id;
+      });
+
+      const genrePromises = selectedGenres.map(async (genre) => {
+        if (genre.isNew) {
+          const res = await api.post('/api/genres', { name: genre.name });
+          return res.id;
+        }
+        return genre.id;
+      });
+
+      const [authorIds, categoryIds, genreIds] = await Promise.all([
+        Promise.all(authorPromises),
+        Promise.all(categoryPromises),
+        Promise.all(genrePromises)
+      ]);
+
+      const payload = {
+        title,
+        description,
+        price: parseFloat(price),
+        imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=400',
+        stock: parseInt(stock),
+        authorIds,
+        categoryIds,
+        genreIds
+      };
+
+      await api.post('/api/books', payload);
+      toast.success('Book published successfully!');
+      
+      setTitle('');
+      setDescription('');
+      setPrice('');
+      setImageUrl('');
+      setStock('');
+      setSelectedAuthors([]);
+      setSelectedCategories([]);
+      setSelectedGenres([]);
+      
+      loadTaxonomies();
+    } catch (error) {
+      toast.error('Failed to publish book');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  if (submitted) {
+  if (loading) {
     return (
-      <div className="page-enter">
-        <div className="section-container py-24 sm:py-32">
-          <div className="max-w-lg mx-auto text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="text-emerald-500" size={32} />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">
-              {t('publish.submitBtn')}
-            </h2>
-            <p className="text-slate-500 leading-relaxed">
-              {t('publish.successMessage')}
-            </p>
-          </div>
-        </div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="animate-spin text-aurora-600" size={36} />
       </div>
     );
   }
@@ -63,131 +194,278 @@ export default function PublishPage() {
     <div className="page-enter">
       <div className="section-container py-12 sm:py-16">
         <div className="max-w-2xl mx-auto">
-
-          {/* Page Header */}
+          
           <div className="mb-10">
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
-              {t('publish.title')}
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3 flex items-center gap-3">
+              <BookOpen className="text-aurora-700" size={32} />
+              Publish Book
             </h1>
             <p className="text-lg text-slate-500 font-light leading-relaxed">
-              {t('publish.subtitle')}
+              Create a new book catalog entry and link or create authors, categories, and genres.
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* Name & Email Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('publish.nameLabel')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('publish.namePlaceholder')}
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('publish.emailLabel')}
-                </label>
-                <input
-                  type="email"
-                  placeholder={t('publish.emailPlaceholder')}
-                  className="input-field"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Book Title */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('publish.bookTitleLabel')}
+                Book Title
               </label>
               <input
                 type="text"
-                placeholder={t('publish.bookTitlePlaceholder')}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter book title"
                 className="input-field"
                 required
               />
             </div>
 
-            {/* Plot */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('publish.plotLabel')}
+                Description
               </label>
               <textarea
-                placeholder={t('publish.plotPlaceholder')}
-                rows={5}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter book plot or description"
+                rows={4}
                 className="input-field resize-none"
                 required
               />
             </div>
 
-            {/* PDF Upload Zone */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('publish.uploadLabel')}
-              </label>
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 ${
-                  isDragging
-                    ? 'border-aurora-500 bg-aurora-50/50'
-                    : file
-                    ? 'border-emerald-300 bg-emerald-50/30'
-                    : 'border-slate-200 hover:border-aurora-300 hover:bg-slate-50'
-                }`}
-              >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Price (R$)
+                </label>
                 <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileSelect}
-                  className="hidden"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  className="input-field"
+                  required
                 />
+              </div>
 
-                {file ? (
-                  <div className="flex items-center justify-center gap-3">
-                    <FileText className="text-emerald-500" size={24} />
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-slate-800">{file.name}</p>
-                      <p className="text-xs text-slate-400">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                      className="ml-4 p-1 text-slate-400 hover:text-red-500 transition-colors"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="mx-auto text-slate-400 mb-3" size={32} />
-                    <p className="text-sm text-slate-500">
-                      {t('publish.uploadDrag')}{' '}
-                      <span className="text-aurora-600 font-medium">{t('publish.uploadBrowse')}</span>
-                    </p>
-                    <p className="text-xs text-slate-400 mt-1">{t('publish.uploadHint')}</p>
-                  </>
-                )}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Stock Quantity
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="0"
+                  className="input-field"
+                  required
+                />
               </div>
             </div>
 
-            {/* Submit */}
-            <button type="submit" className="btn-primary w-full py-4">
-              {t('publish.submitBtn')}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Image URL (Optional)
+              </label>
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/cover.jpg"
+                className="input-field"
+              />
+            </div>
+
+            <div className="border-t border-slate-100 pt-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Authors
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    onChange={handleSelectAuthor}
+                    className="input-field flex-1"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select existing author</option>
+                    {availableAuthors.map(author => (
+                      <option key={author.id} value={author.id}>{author.name}</option>
+                    ))}
+                  </select>
+                  
+                  <div className="flex-1 flex gap-1.5">
+                    <input
+                      type="text"
+                      value={newAuthorName}
+                      onChange={(e) => setNewAuthorName(e.target.value)}
+                      placeholder="Or enter new author"
+                      className="input-field flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddNewAuthor}
+                      className="p-3 bg-aurora-50 hover:bg-aurora-100 text-aurora-700 rounded-xl transition-all duration-200"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {selectedAuthors.map((author, index) => (
+                    <span 
+                      key={author.id || `new-auth-${index}`} 
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                        author.isNew 
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          : 'bg-aurora-50 text-aurora-700 border border-aurora-200'
+                      }`}
+                    >
+                      {author.name} {author.isNew && '(New)'}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedAuthors(selectedAuthors.filter((_, i) => i !== index))}
+                        className="text-slate-400 hover:text-red-500 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Categories
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    onChange={handleSelectCategory}
+                    className="input-field flex-1"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select existing category</option>
+                    {availableCategories.map(category => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
+                  
+                  <div className="flex-1 flex gap-1.5">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="Or enter new category"
+                      className="input-field flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddNewCategory}
+                      className="p-3 bg-aurora-50 hover:bg-aurora-100 text-aurora-700 rounded-xl transition-all duration-200"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {selectedCategories.map((category, index) => (
+                    <span 
+                      key={category.id || `new-cat-${index}`} 
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                        category.isNew 
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          : 'bg-aurora-50 text-aurora-700 border border-aurora-200'
+                      }`}
+                    >
+                      {category.name} {category.isNew && '(New)'}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategories(selectedCategories.filter((_, i) => i !== index))}
+                        className="text-slate-400 hover:text-red-500 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Genres
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    onChange={handleSelectGenre}
+                    className="input-field flex-1"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select existing genre</option>
+                    {availableGenres.map(genre => (
+                      <option key={genre.id} value={genre.id}>{genre.name}</option>
+                    ))}
+                  </select>
+                  
+                  <div className="flex-1 flex gap-1.5">
+                    <input
+                      type="text"
+                      value={newGenreName}
+                      onChange={(e) => setNewGenreName(e.target.value)}
+                      placeholder="Or enter new genre"
+                      className="input-field flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddNewGenre}
+                      className="p-3 bg-aurora-50 hover:bg-aurora-100 text-aurora-700 rounded-xl transition-all duration-200"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {selectedGenres.map((genre, index) => (
+                    <span 
+                      key={genre.id || `new-gen-${index}`} 
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                        genre.isNew 
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          : 'bg-aurora-50 text-aurora-700 border border-aurora-200'
+                      }`}
+                    >
+                      {genre.name} {genre.isNew && '(New)'}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedGenres(selectedGenres.filter((_, i) => i !== index))}
+                        className="text-slate-400 hover:text-red-500 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-primary w-full py-4 shadow-md flex items-center justify-center gap-2 mt-8"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin text-white" size={20} />
+                  Publishing Book...
+                </>
+              ) : (
+                'Publish Book'
+              )}
             </button>
           </form>
         </div>

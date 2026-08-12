@@ -62,6 +62,7 @@ public class AuthService {
             String token = JWT.create()
                     .withIssuer("auth-service")
                     .withSubject(user.getEmail())
+                    .withClaim("role", (user.getRole() != null) ? user.getRole().name() : "USER")
                     .withExpiresAt(getExpirationDate())
                     .sign(algorithm);
             return token;

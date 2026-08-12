@@ -17,7 +17,7 @@ export default function Header() {
     { to: '/', label: t('nav.home') },
     { to: '/books', label: t('nav.books') },
     { to: '/authors', label: t('nav.authors') },
-    { to: '/publish', label: t('nav.publish') },
+    ...(isAuthenticated && user?.role === 'ADMIN' ? [{ to: '/publish', label: t('nav.publish') }] : []),
     { to: '/contact', label: t('nav.contact') },
   ];
 

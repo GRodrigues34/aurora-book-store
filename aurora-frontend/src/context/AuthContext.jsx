@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
     if (storedToken) {
       const decoded = parseJwt(storedToken);
       if (decoded && decoded.exp * 1000 > Date.now()) {
-        setUser({ email: decoded.sub });
+        setUser({ email: decoded.sub, role: decoded.role });
         setToken(storedToken);
         setIsAuthenticated(true);
       } else {
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
     if (response && response.token) {
       localStorage.setItem('token', response.token);
       const decoded = parseJwt(response.token);
-      setUser({ email: decoded.sub });
+      setUser({ email: decoded.sub, role: decoded.role });
       setToken(response.token);
       setIsAuthenticated(true);
       return true;

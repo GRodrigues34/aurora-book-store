@@ -33,7 +33,7 @@ function App() {
                   <Route path="/" element={<HomePage />} />
                   <Route path="/books" element={<BooksPage />} />
                   <Route path="/authors" element={<AuthorsPage />} />
-                  <Route path="/publish" element={<PublishPage />} />
+                  <Route path="/publish" element={<PrivateRoute adminOnly={true}><PublishPage /></PrivateRoute>} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
