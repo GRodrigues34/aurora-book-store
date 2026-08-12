@@ -25,8 +25,18 @@ class BookImageUploadServiceTest {
     @AfterEach
     void tearDown() throws IOException {
         if (uploadedFilename != null) {
-            Files.deleteIfExists(Paths.get("/home/gr/aurora-book-store/aurora-backend/src/main/resources/static/covers", uploadedFilename));
-            Files.deleteIfExists(Paths.get("/home/gr/aurora-book-store/aurora-backend/target/classes/static/covers", uploadedFilename));
+            java.io.File targetFolder = new org.springframework.core.io.ClassPathResource("static/covers").getFile();
+            Files.deleteIfExists(Paths.get(targetFolder.getAbsolutePath(), uploadedFilename));
+
+            java.io.File staticFolder = targetFolder.getParentFile();
+            java.io.File classesFolder = staticFolder != null ? staticFolder.getParentFile() : null;
+            java.io.File targetFolderParent = classesFolder != null ? classesFolder.getParentFile() : null;
+            java.io.File backendFolder = targetFolderParent != null ? targetFolderParent.getParentFile() : null;
+
+            if (backendFolder != null) {
+                java.nio.file.Path sourceFolder = Paths.get(backendFolder.getAbsolutePath(), "src", "main", "resources", "static", "covers");
+                Files.deleteIfExists(Paths.get(sourceFolder.toFile().getAbsolutePath(), uploadedFilename));
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.github.gr.aurora_bookstore.service;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,9 +14,6 @@ import java.util.UUID;
 
 @Service
 public class BookImageUploadService {
-
-    private static final String SOURCE_DIR = "/home/gr/aurora-book-store/aurora-backend/src/main/resources/static/covers";
-    private static final String TARGET_DIR = "/home/gr/aurora-book-store/aurora-backend/target/classes/static/covers";
 
     public String uploadImage(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
@@ -35,17 +33,25 @@ public class BookImageUploadService {
         
         String cleanName = UUID.randomUUID().toString() + extension;
 
-        File targetFolder = new File(TARGET_DIR);
+        File targetFolder = new ClassPathResource("static/covers").getFile();
         if (!targetFolder.exists()) {
             targetFolder.mkdirs();
         }
-        Path targetPath = Paths.get(TARGET_DIR, cleanName);
+        Path targetPath = Paths.get(targetFolder.getAbsolutePath(), cleanName);
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-        File sourceFolder = new File(SOURCE_DIR);
-        if (sourceFolder.exists()) {
-            Path sourcePath = Paths.get(SOURCE_DIR, cleanName);
-            Files.copy(file.getInputStream(), sourcePath, StandardCopyOption.REPLACE_EXISTING);
+        File staticFolder = targetFolder.getParentFile();
+        File classesFolder = staticFolder != null ? staticFolder.getParentFile() : null;
+        File targetFolderParent = classesFolder != null ? classesFolder.getParentFile() : null;
+        File backendFolder = targetFolderParent != null ? targetFolderParent.getParentFile() : null;
+
+        if (backendFolder != null && backendFolder.exists()) {
+            Path sourceFolder = Paths.get(backendFolder.getAbsolutePath(), "src", "main", "resources", "static", "covers");
+            File sourceFolderFile = sourceFolder.toFile();
+            if (sourceFolderFile.exists()) {
+                Path sourcePath = Paths.get(sourceFolderFile.getAbsolutePath(), cleanName);
+                Files.copy(file.getInputStream(), sourcePath, StandardCopyOption.REPLACE_EXISTING);
+            }
         }
 
         return "http://localhost:8080/covers/" + cleanName;
