@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Filter, X } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getBooks, getCategories, getGenres, getAuthors } from '../services/catalog';
@@ -13,6 +14,8 @@ export default function BooksPage() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     Promise.all([getBooks(), getCategories(), getGenres(), getAuthors()])
@@ -25,21 +28,33 @@ export default function BooksPage() {
       .catch(error => console.error(error));
   }, []);
 
-  const hasFilters = selectedCategory || selectedGenre || selectedAuthor;
+  const hasFilters = selectedCategory || selectedGenre || selectedAuthor || searchQuery;
 
   const filteredBooks = useMemo(() => {
     return books.filter(book => {
       if (selectedCategory && !book.categories.some(c => c.id === selectedCategory)) return false;
       if (selectedGenre && !book.genres.some(g => g.id === selectedGenre)) return false;
       if (selectedAuthor && !book.authors.some(a => a.id === selectedAuthor)) return false;
+
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesTitle = book.title.toLowerCase().includes(query);
+        const matchesDesc = book.description?.toLowerCase().includes(query);
+        const matchesAuthor = book.authors.some(a => a.name.toLowerCase().includes(query));
+        const matchesCategory = book.categories.some(c => c.name.toLowerCase().includes(query));
+        const matchesGenre = book.genres.some(g => g.name.toLowerCase().includes(query));
+
+        if (!matchesTitle && !matchesDesc && !matchesAuthor && !matchesCategory && !matchesGenre) return false;
+      }
       return true;
     });
-  }, [books, selectedCategory, selectedGenre, selectedAuthor]);
+  }, [books, selectedCategory, selectedGenre, selectedAuthor, searchQuery]);
 
   const clearFilters = () => {
     setSelectedCategory(null);
     setSelectedGenre(null);
     setSelectedAuthor(null);
+    setSearchParams({});
   };
 
   const FilterPill = ({ label, value, selected, onSelect }) => (
@@ -151,6 +166,20 @@ export default function BooksPage() {
             </button>
           )}
         </div>
+
+        {searchQuery && (
+          <div className="mb-6 flex items-center justify-between bg-slate-50 border border-slate-200/60 rounded-2xl px-5 py-3">
+            <span className="text-sm text-slate-600">
+              Showing results for: <span className="font-semibold text-slate-800">"{searchQuery}"</span>
+            </span>
+            <button
+              onClick={() => setSearchParams({})}
+              className="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+            >
+              <X size={14} /> Clear search
+            </button>
+          </div>
+        )}
 
         {/* Book Grid */}
         {filteredBooks.length > 0 ? (

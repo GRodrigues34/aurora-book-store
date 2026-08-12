@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Menu, X, Globe, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -12,6 +12,15 @@ export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const { totalItems, toggleCart } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    const path = location.pathname.includes('/authors') ? '/authors' : '/books';
+    navigate(`${path}?search=${encodeURIComponent(searchQuery.trim())}`);
+  };
 
   const navLinks = [
     { to: '/', label: t('nav.home') },
@@ -32,16 +41,18 @@ export default function Header() {
             <img src={auroraLogo} alt="Aurora Bookstore" className="h-9 w-auto" />
           </Link>
 
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('nav.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder-slate-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-aurora-400 focus:ring-2 focus:ring-aurora-500/20"
               />
             </div>
-          </div>
+          </form>
 
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map(link => (
@@ -148,14 +159,16 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-t border-slate-100 animate-fade-in">
           <div className="section-container py-4 space-y-1">
-            <div className="relative mb-3 md:hidden">
+            <form onSubmit={handleSearchSubmit} className="relative mb-3 md:hidden">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('nav.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder-slate-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-aurora-400 focus:ring-2 focus:ring-aurora-500/20"
               />
-            </div>
+            </form>
             {navLinks.map(link => (
               <Link
                 key={link.to}

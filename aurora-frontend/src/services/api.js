@@ -65,4 +65,18 @@ export const api = {
       body: JSON.stringify(body),
     });
   },
+
+  postMultipart: async (endpoint, formData) => {
+    const headers = {};
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    return handleResponse(response);
+  },
 };

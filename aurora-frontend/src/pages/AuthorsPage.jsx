@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { ChevronDown, ChevronUp, BookOpen, X } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getAuthors, getBooks } from '../services/catalog';
 
@@ -8,6 +9,8 @@ export default function AuthorsPage() {
   const [expandedAuthor, setExpandedAuthor] = useState(null);
   const [authors, setAuthors] = useState([]);
   const [books, setBooks] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     Promise.all([getAuthors(), getBooks()])
@@ -17,6 +20,12 @@ export default function AuthorsPage() {
       })
       .catch(error => console.error(error));
   }, []);
+
+  const filteredAuthors = useMemo(() => {
+    if (!searchQuery) return authors;
+    const query = searchQuery.toLowerCase();
+    return authors.filter(author => author.name.toLowerCase().includes(query));
+  }, [authors, searchQuery]);
 
   const getBooksByAuthor = (authorId) => {
     return books.filter(book => book.authors.some(a => a.id === authorId));
@@ -49,9 +58,24 @@ export default function AuthorsPage() {
           </p>
         </div>
 
+        {searchQuery && (
+          <div className="mb-6 flex items-center justify-between bg-slate-50 border border-slate-200/60 rounded-2xl px-5 py-3">
+            <span className="text-sm text-slate-600">
+              Showing results for: <span className="font-semibold text-slate-800">"{searchQuery}"</span>
+            </span>
+            <button
+              onClick={() => setSearchParams({})}
+              className="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+            >
+              <X size={14} /> Clear search
+            </button>
+          </div>
+        )}
+
         {/* Author Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {authors.map((author, index) => {
+        {filteredAuthors.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAuthors.map((author, index) => {
             const authorBooks = getBooksByAuthor(author.id);
             const isExpanded = expandedAuthor === author.id;
 
@@ -116,7 +140,15 @@ export default function AuthorsPage() {
               </div>
             );
           })}
-        </div>
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <p className="text-lg text-slate-400 mb-4">No authors found matching your search</p>
+            <button onClick={() => setSearchParams({})} className="btn-secondary">
+              Clear search
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
