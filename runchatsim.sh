@@ -1,9 +1,11 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 cleanup() {
     echo ""
     echo "Encerrando o Spring Boot e parando os Dockers..."
-    cd /home/gr/aurora-book-store
+    cd "$SCRIPT_DIR"
     docker compose down
     exit 0
 }
@@ -11,11 +13,11 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 echo "Subindo os Dockers (MySQL/ChromaDB)..."
-cd /home/gr/aurora-book-store
+cd "$SCRIPT_DIR"
 docker compose up -d
 
 echo "Compilando o backend..."
-cd /home/gr/aurora-book-store/aurora-backend
+cd "$SCRIPT_DIR/aurora-backend"
 mvn clean install -DskipTests
 
 echo "Aguardando o MySQL estar pronto na porta 3307..."
