@@ -19,9 +19,11 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import OrdersPage from './pages/OrdersPage';
 import PrivateRoute from './components/PrivateRoute';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
+import { useScrollReveal } from './hooks/useScrollReveal';
 
 function AppShell() {
   useSmoothScroll();
+  useScrollReveal();
   const location = useLocation();
   const isHome = location.pathname === '/';
 
