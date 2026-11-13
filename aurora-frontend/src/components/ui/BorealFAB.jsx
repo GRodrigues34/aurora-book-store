@@ -8,44 +8,49 @@ export default function BorealFAB() {
   return (
     <>
       {/* Chat Panel */}
-      {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[380px] max-h-[70vh] rounded-2xl shadow-2xl border border-slate-200 bg-white overflow-hidden animate-slide-up flex flex-col">
-          {/* Panel Header */}
-          <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-aurora-700 to-aurora-600 text-white flex-shrink-0">
-            <div>
-              <h3 className="text-sm font-semibold">Boreal AI</h3>
-              <p className="text-[11px] text-aurora-200 opacity-90">Aurora Bookstore Assistant</p>
-            </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 rounded-lg hover:bg-white/20 transition-colors"
-              aria-label="Close chat"
-            >
-              <X size={18} />
-            </button>
+      <div
+        aria-hidden={!isOpen}
+        className={`fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] max-h-[70vh] rounded-2xl shadow-[0_24px_60px_rgba(12,10,15,0.28)] border border-paper-border bg-paper overflow-hidden flex flex-col origin-bottom-right transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isOpen
+            ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+            : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
+        }`}
+      >
+        {/* Panel Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 bg-obsidian text-paper border-b border-paper/10 flex-shrink-0">
+          <div>
+            <h3 className="text-sm font-semibold text-paper">Boreal AI</h3>
+            <p className="text-[11px] text-paper/65">Aurora Bookstore Assistant</p>
           </div>
-
-          {/* Chat Component */}
-          <div className="flex-1 overflow-hidden">
-            <Chat embedded />
-          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-1.5 rounded-full text-paper/75 hover:text-paper hover:bg-white/10 transition-colors"
+            aria-label="Close chat"
+          >
+            <X size={18} />
+          </button>
         </div>
-      )}
+
+        {/* Chat Component */}
+        <div className="flex-1 overflow-hidden bg-paper">
+          <Chat embedded />
+        </div>
+      </div>
 
       {/* FAB Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-paper/15 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isOpen
-            ? 'bg-slate-700 hover:bg-slate-800 rotate-0'
-            : 'bg-gradient-to-br from-aurora-600 to-emerald-500 hover:from-aurora-700 hover:to-emerald-600 animate-pulse-soft'
+            ? 'bg-aurora-700 hover:bg-aurora-600 rotate-90 scale-95'
+            : 'bg-obsidian hover:bg-aurora-800 hover:scale-105'
         }`}
         aria-label="Toggle Boreal AI Assistant"
       >
         {isOpen ? (
-          <X className="text-white" size={22} />
+          <X className="text-paper" size={22} />
         ) : (
-          <MessageCircle className="text-white" size={22} />
+          <MessageCircle className="text-paper" size={22} />
         )}
       </button>
     </>
