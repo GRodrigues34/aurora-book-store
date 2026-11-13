@@ -146,7 +146,7 @@ export default function HomePage() {
   return (
     <div ref={pageRef} className="overflow-x-clip">
       {/* Section 1: Obsidian Hero Stage */}
-      <section data-surface="dark" className="relative bg-obsidian text-paper border-b border-paper/10">
+      <section data-surface="dark" className="sticky top-0 z-10 bg-obsidian text-paper border-b border-paper/10">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -194,7 +194,7 @@ export default function HomePage() {
       </section>
 
       {/* Section 2: Immediate Books Catalog (Warm Ivory) */}
-      <section ref={catalogRef} id="catalog" data-surface="light" className="bg-paper text-ink py-16 sm:py-24 border-b border-paper-border">
+      <section ref={catalogRef} id="catalog" data-surface="light" className="relative z-20 rounded-t-[2rem] shadow-[0_-24px_60px_rgba(0,0,0,0.28)] bg-paper text-ink py-16 sm:py-24 border-b border-paper-border">
         <div className="section-container">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 mb-10 border-b border-paper-border">
             <div>
