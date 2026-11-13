@@ -261,7 +261,7 @@ export default function HomePage() {
               </p>
             </div>
           ) : loadingBooks ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {[1, 2, 3].map((n) => (
                 <div key={n} className="rounded-2xl border border-paper-border bg-white overflow-hidden animate-pulse">
                   <div className="aspect-[3/4] bg-paper-subtle" />
@@ -291,7 +291,7 @@ export default function HomePage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredBooks.map((book) => (
                 <BookCard key={book.id} book={book} />
               ))}
