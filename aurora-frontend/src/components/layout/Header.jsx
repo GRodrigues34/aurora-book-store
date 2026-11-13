@@ -87,7 +87,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 backdrop-blur-md border-b transition-colors duration-300 ${headerBg}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-colors duration-300 ${headerBg}`}>
         <div className="section-container">
           <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
             <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
