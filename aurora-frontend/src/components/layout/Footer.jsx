@@ -1,33 +1,33 @@
 import { Link } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function Footer() {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-paper-subtle border-t border-paper-border">
-      <div className="section-container py-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-aurora-700 flex items-center justify-center">
-              <BookOpen className="text-white" size={18} />
-            </div>
-            <div>
-              <p className="font-display text-base font-medium text-ink">Aurora Bookstore</p>
-              <p className="text-xs text-ink-muted">{t('footer.tagline')}</p>
-            </div>
+    <footer className="bg-obsidian-deep text-paper border-t border-paper/10 overflow-hidden">
+      <div className="section-container pt-14 pb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-12 border-b border-paper/10">
+          <div>
+            <p className="font-sans text-base font-medium text-paper">Aurora Bookstore</p>
+            <p className="serif-italic text-lg text-paper/60 mt-1">{t('footer.tagline')}</p>
           </div>
 
-          <nav className="flex items-center gap-6">
-            <Link to="/books" className="text-sm text-ink-muted hover:text-aurora-700 transition-colors">{t('nav.books')}</Link>
-            <Link to="/authors" className="text-sm text-ink-muted hover:text-aurora-700 transition-colors">{t('nav.authors')}</Link>
-            <Link to="/publish" className="text-sm text-ink-muted hover:text-aurora-700 transition-colors">{t('nav.publish')}</Link>
-            <Link to="/contact" className="text-sm text-ink-muted hover:text-aurora-700 transition-colors">{t('nav.contact')}</Link>
+          <nav className="flex flex-wrap items-center gap-6">
+            <Link to="/books" className="text-sm text-paper/65 hover:text-gold transition-colors">{t('nav.books')}</Link>
+            <Link to="/authors" className="text-sm text-paper/65 hover:text-gold transition-colors">{t('nav.authors')}</Link>
+            <Link to="/publish" className="text-sm text-paper/65 hover:text-gold transition-colors">{t('nav.publish')}</Link>
+            <Link to="/contact" className="text-sm text-paper/65 hover:text-gold transition-colors">{t('nav.contact')}</Link>
           </nav>
 
-          <p className="text-xs text-ink-subtle">
+          <p className="font-mono text-xs text-paper/45">
             {t('footer.copyright')}
+          </p>
+        </div>
+
+        <div className="pt-8 select-none" aria-hidden="true">
+          <p className="font-sans font-semibold tracking-[-0.06em] leading-[0.82] text-[clamp(3.75rem,14vw,12rem)] text-paper/90 text-center">
+            AURORA
           </p>
         </div>
       </div>

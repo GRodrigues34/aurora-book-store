@@ -18,8 +18,10 @@ import RegisterPage from './pages/RegisterPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import OrdersPage from './pages/OrdersPage';
 import PrivateRoute from './components/PrivateRoute';
+import { useSmoothScroll } from './hooks/useSmoothScroll';
 
 function AppRoutes() {
+  useSmoothScroll();
   return (
     <BrowserRouter>
       <LanguageProvider>

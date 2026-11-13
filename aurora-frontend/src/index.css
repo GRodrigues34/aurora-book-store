@@ -6,7 +6,6 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
   }
 
   body {
@@ -14,16 +13,16 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight text-ink;
+    @apply font-sans tracking-tight text-ink;
   }
 
   ::selection {
-    background-color: #E9D5FF;
-    color: #240440;
+    background-color: #6B21A8;
+    color: #F7F4EF;
   }
 
   :focus-visible {
-    outline: 2px solid #7E22CE;
+    outline: 2px solid #D4AF37;
     outline-offset: 2px;
   }
 
@@ -37,16 +36,16 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #F3EFE9;
+    background: #111111;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #D2C8BA;
+    background: #3B0764;
     border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #A89C8C;
+    background: #6B21A8;
   }
 }
 
@@ -54,12 +53,12 @@
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2
            px-6 py-3 rounded-full
-           bg-aurora-700 text-white font-medium text-sm
+           bg-aurora-700 text-paper font-medium text-sm
            hover:bg-aurora-800 active:bg-aurora-900
            disabled:opacity-50 disabled:cursor-not-allowed
            transition-all duration-200 ease-out
            shadow-aurora-sm hover:shadow-aurora-md
-           focus:outline-none focus:ring-2 focus:ring-aurora-500 focus:ring-offset-2 focus:ring-offset-paper;
+           focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-paper;
   }
 
   .btn-secondary {
@@ -67,7 +66,7 @@
            px-6 py-3 rounded-full
            bg-white text-ink font-medium text-sm
            border border-paper-border
-           hover:bg-paper-subtle hover:border-aurora-300 active:bg-aurora-50
+           hover:bg-paper-subtle hover:border-aurora-300
            transition-all duration-200 ease-out
            focus:outline-none focus:ring-2 focus:ring-aurora-500 focus:ring-offset-2 focus:ring-offset-paper;
   }
@@ -80,7 +79,7 @@
   }
 
   .section-container {
-    @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12;
+    @apply max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12;
   }
 
   .input-field {
@@ -92,20 +91,16 @@
            focus:border-aurora-500 focus:ring-2 focus:ring-aurora-500/20;
   }
 
-  .tabular-nums {
-    font-variant-numeric: tabular-nums;
+  .serif-italic {
+    @apply font-serif italic font-normal;
   }
 
-  .page-enter {
-    @apply animate-fade-in;
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

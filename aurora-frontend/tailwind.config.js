@@ -7,15 +7,27 @@ export default {
   theme: {
     extend: {
       colors: {
+        obsidian: {
+          DEFAULT: '#111111',
+          deep: '#070707',
+        },
+        'deep-purple': {
+          DEFAULT: '#2A1B3D',
+          plum: '#5A2A5F',
+        },
         paper: {
-          DEFAULT: '#FAF8F5',
-          subtle: '#F3EFE9',
-          border: '#E6DFD5',
+          DEFAULT: '#F7F4EF',
+          subtle: '#EFECE6',
+          border: '#E2DDD5',
         },
         ink: {
           DEFAULT: '#18141F',
           muted: '#5E5768',
           subtle: '#8B8396',
+        },
+        gold: {
+          DEFAULT: '#D4AF37',
+          soft: 'rgba(212, 175, 55, 0.16)',
         },
         aurora: {
           50:  '#FAF5FF',
@@ -32,36 +44,14 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Newsreader', 'Georgia', 'serif'],
-        sans: ['Epilogue', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['General Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['Instrument Serif', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       boxShadow: {
-        'aurora-sm': '0 2px 6px -1px rgba(24, 20, 31, 0.05), 0 1px 2px -1px rgba(24, 20, 31, 0.03)',
-        'aurora-md': '0 8px 20px -4px rgba(24, 20, 31, 0.08), 0 2px 6px -2px rgba(107, 33, 168, 0.05)',
-        'aurora-lg': '0 16px 36px -8px rgba(24, 20, 31, 0.12), 0 4px 12px -4px rgba(107, 33, 168, 0.08)',
-      },
-      borderRadius: {
-        'aurora': '1rem',
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-        'pulse-soft': 'pulseSoft 2.4s ease-in-out infinite',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(14px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        pulseSoft: {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(107, 33, 168, 0.35)' },
-          '50%': { boxShadow: '0 0 0 10px rgba(107, 33, 168, 0)' },
-        },
+        'aurora-sm': '0 2px 6px -1px rgba(17, 17, 17, 0.06), 0 1px 2px -1px rgba(17, 17, 17, 0.04)',
+        'aurora-md': '0 10px 24px -6px rgba(17, 17, 17, 0.10), 0 2px 6px -2px rgba(107, 33, 168, 0.06)',
+        'aurora-lg': '0 20px 44px -10px rgba(17, 17, 17, 0.18), 0 4px 12px -4px rgba(107, 33, 168, 0.10)',
       },
     },
   },
