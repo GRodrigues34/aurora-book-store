@@ -10,15 +10,13 @@ export default function VerifyEmailPage() {
   const { verifyEmail } = useAuth();
   const { t } = useLanguage();
 
-  const [status, setStatus] = useState('loading'); // loading | success | error
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState(() => (token ? 'loading' : 'error'));
+  const [errorMessage, setErrorMessage] = useState(() =>
+    token ? '' : 'Verification token is missing.'
+  );
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error');
-      setErrorMessage('Verification token is missing.');
-      return;
-    }
+    if (!token) return;
 
     let cancelled = false;
     verifyEmail(token)
@@ -35,7 +33,7 @@ export default function VerifyEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, verifyEmail]);
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center py-16 px-6 bg-paper">

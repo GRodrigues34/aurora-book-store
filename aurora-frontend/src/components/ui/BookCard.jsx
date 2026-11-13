@@ -24,7 +24,7 @@ export default function BookCard({ book }) {
       await addItem(book.id, 1);
       toast.success(t('cart.addBtn'));
       toggleCart();
-    } catch (error) {
+    } catch {
       toast.error('Failed to add item to cart');
     }
   };
@@ -47,7 +47,7 @@ export default function BookCard({ book }) {
       await createOrder(dto);
       toast.success('Purchase completed successfully!');
       navigate('/orders');
-    } catch (error) {
+    } catch {
       toast.error('Failed to complete purchase');
     }
   };

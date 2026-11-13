@@ -23,7 +23,7 @@ export default function CartDrawer() {
         await fetchCart();
         toggleCart();
         navigate('/orders');
-      } catch (error) {
+      } catch {
         toast.error('Failed to place order');
       }
     }
@@ -33,7 +33,7 @@ export default function CartDrawer() {
     try {
       await removeItem(itemId);
       toast.success('Item removed from cart');
-    } catch (error) {
+    } catch {
       toast.error('Failed to remove item');
     }
   };

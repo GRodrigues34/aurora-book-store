@@ -42,7 +42,7 @@ export default function PublishPage() {
       setAvailableAuthors(authors || []);
       setAvailableCategories(categories || []);
       setAvailableGenres(genres || []);
-    } catch (error) {
+    } catch {
       toast.error(t('publish.errorTaxonomies'));
     } finally {
       setLoading(false);
@@ -50,8 +50,24 @@ export default function PublishPage() {
   };
 
   useEffect(() => {
-    loadTaxonomies();
-  }, []);
+    let cancelled = false;
+    Promise.all([getAuthors(), getCategories(), getGenres()])
+      .then(([authors, categories, genres]) => {
+        if (cancelled) return;
+        setAvailableAuthors(authors || []);
+        setAvailableCategories(categories || []);
+        setAvailableGenres(genres || []);
+      })
+      .catch(() => {
+        if (!cancelled) toast.error(t('publish.errorTaxonomies'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -216,7 +232,7 @@ export default function PublishPage() {
       setSelectedGenres([]);
       
       loadTaxonomies();
-    } catch (error) {
+    } catch {
       toast.error(t('publish.error'));
     } finally {
       setIsSubmitting(false);

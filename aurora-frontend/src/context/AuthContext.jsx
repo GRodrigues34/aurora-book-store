@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { api } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -6,16 +6,31 @@ const AuthContext = createContext(null);
 const parseJwt = (token) => {
   try {
     return JSON.parse(atob(token.split('.')[1]));
-  } catch (e) {
+  } catch {
     return null;
   }
 };
 
+const readStoredSession = () => {
+  const storedToken = localStorage.getItem('token');
+  if (!storedToken) return { user: null, token: null };
+  const decoded = parseJwt(storedToken);
+  if (decoded && decoded.exp * 1000 > Date.now()) {
+    return {
+      user: { email: decoded.sub, role: decoded.role },
+      token: storedToken,
+    };
+  }
+  localStorage.removeItem('token');
+  return { user: null, token: null };
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [initialSession] = useState(readStoredSession);
+  const [user, setUser] = useState(initialSession.user);
+  const [token, setToken] = useState(initialSession.token);
+  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(initialSession.token));
+  const loading = false;
 
   const applySessionToken = (jwtToken) => {
     localStorage.setItem('token', jwtToken);
@@ -24,21 +39,6 @@ export function AuthProvider({ children }) {
     setToken(jwtToken);
     setIsAuthenticated(true);
   };
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      const decoded = parseJwt(storedToken);
-      if (decoded && decoded.exp * 1000 > Date.now()) {
-        setUser({ email: decoded.sub, role: decoded.role });
-        setToken(storedToken);
-        setIsAuthenticated(true);
-      } else {
-        localStorage.removeItem('token');
-      }
-    }
-    setLoading(false);
-  }, []);
 
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { login: email, password });
@@ -63,9 +63,9 @@ export function AuthProvider({ children }) {
     return { requiresVerification: true, email: createdUser?.email || email };
   };
 
-  const verifyEmail = async (verificationToken) => {
+  const verifyEmail = useCallback(async (verificationToken) => {
     return api.get(`/auth/verify-email?token=${encodeURIComponent(verificationToken)}`);
-  };
+  }, []);
 
   const resendVerification = async (email) => {
     return api.post('/auth/resend-verification', { email });
@@ -98,6 +98,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

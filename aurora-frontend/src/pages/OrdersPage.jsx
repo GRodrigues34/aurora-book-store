@@ -14,7 +14,7 @@ export default function OrdersPage() {
     try {
       const data = await getOrders();
       setOrders(data || []);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load orders');
     } finally {
       setLoading(false);
@@ -22,7 +22,20 @@ export default function OrdersPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    let cancelled = false;
+    getOrders()
+      .then((data) => {
+        if (!cancelled) setOrders(data || []);
+      })
+      .catch(() => {
+        if (!cancelled) toast.error('Failed to load orders');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleCancelOrder = async (orderId) => {
@@ -30,7 +43,7 @@ export default function OrdersPage() {
       await cancelOrder(orderId);
       toast.success('Order cancelled successfully');
       fetchOrders();
-    } catch (error) {
+    } catch {
       toast.error('Failed to cancel order');
     }
   };

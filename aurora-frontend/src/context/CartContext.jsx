@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { useAuth } from './AuthContext';
 
@@ -9,22 +9,31 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       const data = await api.get('/api/carts');
       setCart(data);
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    } else {
-      setCart(null);
-    }
+    if (!isAuthenticated) return;
+
+    let cancelled = false;
+    api.get('/api/carts')
+      .then((data) => {
+        if (!cancelled) setCart(data);
+      })
+      .catch((error) => console.error(error));
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated]);
+
+  const activeCart = isAuthenticated ? cart : null;
 
   const addItem = async (bookId, quantity = 1) => {
     try {
@@ -50,21 +59,22 @@ export function CartProvider({ children }) {
     setIsOpen(!isOpen);
   };
 
-  const totalItems = cart?.cartItems
-    ? Array.from(cart.cartItems).reduce((sum, item) => sum + item.quantity, 0)
+  const totalItems = activeCart?.cartItems
+    ? Array.from(activeCart.cartItems).reduce((sum, item) => sum + item.quantity, 0)
     : 0;
 
-  const totalPrice = cart?.cartItems
-    ? Array.from(cart.cartItems).reduce((sum, item) => sum + item.book.price * item.quantity, 0)
+  const totalPrice = activeCart?.cartItems
+    ? Array.from(activeCart.cartItems).reduce((sum, item) => sum + item.book.price * item.quantity, 0)
     : 0;
 
   return (
-    <CartContext.Provider value={{ cart, isOpen, totalItems, totalPrice, addItem, removeItem, toggleCart, setIsOpen, fetchCart }}>
+    <CartContext.Provider value={{ cart: activeCart, isOpen, totalItems, totalPrice, addItem, removeItem, toggleCart, setIsOpen, fetchCart }}>
       {children}
     </CartContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {
