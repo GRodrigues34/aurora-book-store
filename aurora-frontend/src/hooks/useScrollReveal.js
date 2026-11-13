@@ -1,18 +1,69 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const REVEAL_SELECTOR = [
-  'main section:not([data-no-reveal])',
+const DIRECTIONAL_SELECTOR = [
+  'main [data-reveal]',
   'main article',
   'main form',
-  'main [data-reveal]',
+  'main section > div > div:first-child',
   'footer > div',
 ].join(', ');
 
+const WORD_HEADING_SELECTOR = 'main h2:not([data-no-reveal]), main h3:not(article h3):not([data-no-reveal])';
+
+function splitHeadingWords(heading) {
+  if (heading.dataset.wordsSplit === 'true') return;
+  const text = heading.textContent?.trim();
+  if (!text) return;
+
+  // Only split plain-text headings so we never break nested icons/links.
+  if (heading.children.length > 0) {
+    heading.setAttribute('data-reveal', 'left');
+    heading.dataset.wordsSplit = 'true';
+    return;
+  }
+
+  heading.dataset.wordsSplit = 'true';
+  heading.setAttribute('data-reveal-words', '');
+  const words = text.split(/\s+/);
+  heading.textContent = '';
+
+  words.forEach((word, idx) => {
+    const mask = document.createElement('span');
+    mask.className = 'word-mask';
+
+    const inner = document.createElement('span');
+    inner.className = 'word-inner';
+    inner.style.setProperty('--word-delay', `${idx * 48}ms`);
+    inner.textContent = word;
+
+    mask.appendChild(inner);
+    heading.appendChild(mask);
+    if (idx < words.length - 1) {
+      heading.appendChild(document.createTextNode(' '));
+    }
+  });
+}
+
+function assignDirection(el, index) {
+  if (el.hasAttribute('data-reveal')) return;
+  const tag = el.tagName.toLowerCase();
+  if (tag === 'article') {
+    el.setAttribute('data-reveal', 'scale');
+    el.style.setProperty('--reveal-delay', `${(index % 4) * 70}ms`);
+  } else if (tag === 'form') {
+    el.setAttribute('data-reveal', 'right');
+  } else if (el.closest('footer')) {
+    el.setAttribute('data-reveal', 'up');
+  } else {
+    el.setAttribute('data-reveal', index % 2 === 0 ? 'left' : 'right');
+  }
+}
+
 /**
- * Smoothly reveals sections, cards, forms, and footer blocks as they enter the viewport.
- * Automatically observes dynamically rendered items (e.g. async book/author grids)
- * across route transitions while respecting reduced-motion preferences.
+ * Portfolio-grade directional & word-mask scroll reveal choreography.
+ * Uses GPU-accelerated transforms (expo.out) and word-by-word masked builds,
+ * automatically observing async-loaded grids across route transitions.
  */
 export function useScrollReveal() {
   const { pathname } = useLocation();
@@ -26,52 +77,55 @@ export function useScrollReveal() {
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-          const el = entry.target;
-          el.style.opacity = '1';
-          el.style.transform = 'translate3d(0, 0, 0)';
-          observer.unobserve(el);
+          entry.target.classList.add('is-inview');
+          observer.unobserve(entry.target);
         });
       },
       {
-        threshold: 0.06,
-        rootMargin: '0px 0px -32px 0px',
+        threshold: 0.08,
+        rootMargin: '0px 0px -36px 0px',
       }
     );
 
     const bindElements = () => {
-      const candidates = document.querySelectorAll(REVEAL_SELECTOR);
+      document.querySelectorAll(WORD_HEADING_SELECTOR).forEach((heading) => {
+        splitHeadingWords(heading);
+      });
+
+      const candidates = document.querySelectorAll(DIRECTIONAL_SELECTOR);
       candidates.forEach((el, index) => {
         if (el.dataset.revealBound === 'true') return;
-
-        // Skip sticky containers (e.g., HomePage hero) so they are immediately visible.
-        const computedPosition = window.getComputedStyle(el).position;
-        if (computedPosition === 'sticky') {
+        if (window.getComputedStyle(el).position === 'sticky' || el.closest('[data-no-reveal]')) {
           el.dataset.revealBound = 'true';
           return;
         }
 
+        assignDirection(el, index);
         el.dataset.revealBound = 'true';
 
-        // If already in the initial viewport, reveal immediately without hiding first.
         const rect = el.getBoundingClientRect();
         if (rect.top < window.innerHeight * 0.92) {
-          el.style.opacity = '1';
-          el.style.transform = 'translate3d(0, 0, 0)';
+          el.classList.add('is-inview');
           return;
         }
+        observer.observe(el);
+      });
 
-        const staggerMs = (index % 5) * 45;
-        el.style.opacity = '0';
-        el.style.transform = 'translate3d(0, 22px, 0)';
-        el.style.transition = `opacity 680ms cubic-bezier(0.22, 1, 0.36, 1) ${staggerMs}ms, transform 680ms cubic-bezier(0.22, 1, 0.36, 1) ${staggerMs}ms`;
+      document.querySelectorAll('[data-reveal-words]').forEach((el) => {
+        if (el.dataset.revealWordsBound === 'true') return;
+        el.dataset.revealWordsBound = 'true';
+
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) {
+          el.classList.add('is-inview');
+          return;
+        }
         observer.observe(el);
       });
     };
 
-    // Initial bind after route render
     const rafId = window.requestAnimationFrame(bindElements);
 
-    // Watch for async-loaded content (books, authors, orders)
     const mutationObserver = new MutationObserver(() => {
       bindElements();
     });
