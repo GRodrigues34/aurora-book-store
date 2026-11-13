@@ -17,6 +17,14 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const applySessionToken = (jwtToken) => {
+    localStorage.setItem('token', jwtToken);
+    const decoded = parseJwt(jwtToken);
+    setUser({ email: decoded.sub, role: decoded.role });
+    setToken(jwtToken);
+    setIsAuthenticated(true);
+  };
+
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
@@ -35,19 +43,32 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { login: email, password });
     if (response && response.token) {
-      localStorage.setItem('token', response.token);
-      const decoded = parseJwt(response.token);
-      setUser({ email: decoded.sub, role: decoded.role });
-      setToken(response.token);
-      setIsAuthenticated(true);
+      applySessionToken(response.token);
+      return true;
+    }
+    return false;
+  };
+
+  const loginWithGoogle = async (credential) => {
+    const response = await api.post('/auth/google', { credential });
+    if (response && response.token) {
+      applySessionToken(response.token);
       return true;
     }
     return false;
   };
 
   const register = async (username, email, password) => {
-    await api.post('/auth/register', { username, email, password, role: 'USER' });
-    return login(email, password);
+    const createdUser = await api.post('/auth/register', { username, email, password, role: 'USER' });
+    return { requiresVerification: true, email: createdUser?.email || email };
+  };
+
+  const verifyEmail = async (verificationToken) => {
+    return api.get(`/auth/verify-email?token=${encodeURIComponent(verificationToken)}`);
+  };
+
+  const resendVerification = async (email) => {
+    return api.post('/auth/resend-verification', { email });
   };
 
   const logout = () => {
@@ -58,7 +79,20 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isAuthenticated,
+        loading,
+        login,
+        loginWithGoogle,
+        register,
+        verifyEmail,
+        resendVerification,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

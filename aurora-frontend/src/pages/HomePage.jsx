@@ -22,46 +22,59 @@ export default function HomePage() {
 
   return (
     <div className="page-enter">
+      {/* Editorial Hero */}
+      <section className="border-b border-paper-border bg-paper">
+        <div className="section-container py-16 sm:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7 space-y-7">
+              <h1 className="font-display text-5xl sm:text-6xl lg:text-[4.25rem] font-normal text-ink leading-[1.02] tracking-[-0.03em]">
+                {t('home.heroTitle')}
+              </h1>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-aurora-50/50 via-white to-emerald-50/30" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-aurora-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-200/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+              <p className="text-base sm:text-lg text-ink-muted leading-relaxed max-w-[62ch]">
+                {t('home.heroSubtitle')}
+              </p>
 
-        <div className="section-container relative py-12 sm:py-16 lg:py-10">
-          <div className="max-w-3xl mx-auto text-center">
-            {/* Accent line */}
-            <div className="flex justify-center -mb-[35px] md:-mb-[110px]">
-              <img src={auroraLogo} alt="Aurora Bookstore Logo" className="h-[220px] md:h-[500px] w-auto" />
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <Link to="/books" className="btn-primary text-sm px-7 py-3.5">
+                  {t('home.heroCta')}
+                  <ArrowRight size={16} />
+                </Link>
+                <Link to="/authors" className="btn-secondary text-sm px-7 py-3.5">
+                  {t('nav.authors')}
+                </Link>
+              </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
-              {t('home.heroTitle')}
-            </h1>
-
-            <p className="text-lg sm:text-xl text-slate-500 leading-relaxed mb-10 max-w-2xl mx-auto font-light">
-              {t('home.heroSubtitle')}
-            </p>
-
-            <Link to="/books" className="btn-primary text-base px-8 py-4">
-              {t('home.heroCta')}
-              <ArrowRight size={18} />
-            </Link>
+            <div className="lg:col-span-5 flex justify-center lg:justify-end">
+              <div className="w-full max-w-sm rounded-2xl bg-white border border-paper-border shadow-aurora-lg p-8 flex flex-col items-center text-center">
+                <img
+                  src={auroraLogo}
+                  alt="Aurora Bookstore Emblem"
+                  className="w-56 h-auto object-contain mb-4"
+                />
+                <p className="font-display italic text-lg text-ink-muted">
+                  {t('footer.tagline')}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Featured Books */}
-      <section className="py-20 sm:py-24">
+      <section className="py-20 sm:py-24 bg-white border-b border-paper-border">
         <div className="section-container">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+          <div className="flex items-end justify-between pb-6 mb-10 border-b border-paper-border">
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-ink">
               {t('home.featuredTitle')}
             </h2>
-            <Link to="/books" className="text-sm font-medium text-aurora-700 hover:text-aurora-800 transition-colors flex items-center gap-1">
-              {t('nav.books')} <ArrowRight size={14} />
+            <Link
+              to="/books"
+              className="text-sm font-medium text-aurora-700 hover:text-aurora-900 transition-colors flex items-center gap-1.5"
+            >
+              {t('nav.books')}
+              <ArrowRight size={15} />
             </Link>
           </div>
 
@@ -73,56 +86,58 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Aurora */}
-      <section className="py-20 sm:py-24 bg-slate-50/50">
+      {/* Why Aurora — Asymmetric 12-Column Editorial Layout */}
+      <section className="py-20 sm:py-24 bg-paper">
         <div className="section-container">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
-              {t('home.whyTitle')}
-            </h2>
-            <div className="flex justify-center">
-              <div className="h-1 w-12 rounded-full bg-gradient-to-r from-aurora-500 to-emerald-400" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Curated */}
-            <div className="card p-8 text-center group">
-              <div className="w-14 h-14 rounded-2xl bg-aurora-50 flex items-center justify-center mx-auto mb-5 group-hover:bg-aurora-100 transition-colors duration-300">
-                <BookOpen className="text-aurora-600" size={24} />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                {t('home.whyCurated')}
-              </h3>
-              <p className="text-sm text-slate-500 leading-relaxed">
-                {t('home.whyCuratedDesc')}
-              </p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-4">
+              <h2 className="font-display text-3xl sm:text-4xl font-normal text-ink leading-tight">
+                {t('home.whyTitle')}
+              </h2>
             </div>
 
-            {/* Community */}
-            <div className="card p-8 text-center group">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-5 group-hover:bg-emerald-100 transition-colors duration-300">
-                <Users className="text-emerald-600" size={24} />
+            <div className="lg:col-span-8 divide-y divide-paper-border border-t border-b border-paper-border">
+              <div className="py-7 flex items-start gap-5">
+                <div className="w-11 h-11 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="text-aurora-700" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-medium text-ink mb-1.5">
+                    {t('home.whyCurated')}
+                  </h3>
+                  <p className="text-sm text-ink-muted leading-relaxed max-w-[60ch]">
+                    {t('home.whyCuratedDesc')}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                {t('home.whyCommunity')}
-              </h3>
-              <p className="text-sm text-slate-500 leading-relaxed">
-                {t('home.whyCommunityDesc')}
-              </p>
-            </div>
 
-            {/* AI */}
-            <div className="card p-8 text-center group">
-              <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center mx-auto mb-5 group-hover:bg-purple-100 transition-colors duration-300">
-                <Sparkles className="text-purple-600" size={24} />
+              <div className="py-7 flex items-start gap-5">
+                <div className="w-11 h-11 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
+                  <Users className="text-emerald-700" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-medium text-ink mb-1.5">
+                    {t('home.whyCommunity')}
+                  </h3>
+                  <p className="text-sm text-ink-muted leading-relaxed max-w-[60ch]">
+                    {t('home.whyCommunityDesc')}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                {t('home.whyAi')}
-              </h3>
-              <p className="text-sm text-slate-500 leading-relaxed">
-                {t('home.whyAiDesc')}
-              </p>
+
+              <div className="py-7 flex items-start gap-5">
+                <div className="w-11 h-11 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="text-aurora-700" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-medium text-ink mb-1.5">
+                    {t('home.whyAi')}
+                  </h3>
+                  <p className="text-sm text-ink-muted leading-relaxed max-w-[60ch]">
+                    {t('home.whyAiDesc')}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

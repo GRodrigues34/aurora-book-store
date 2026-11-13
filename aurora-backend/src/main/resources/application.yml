@@ -36,10 +36,28 @@ spring:
         client:
           host: http://localhost
           port: 8000
+  # mail config (optional in dev; falls back to console logging when MAIL_HOST/MAIL_USERNAME are unset)
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 api:
   security:
     token:
-      secret: "conformidade"
+      secret: ${JWT_SECRET:conformidade}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+  app:
+    frontend-url: ${APP_FRONTEND_URL:http://localhost:5173}
+    mail-from: ${MAIL_FROM:noreply@aurorabookstore.local}
 
 logging:
   level:

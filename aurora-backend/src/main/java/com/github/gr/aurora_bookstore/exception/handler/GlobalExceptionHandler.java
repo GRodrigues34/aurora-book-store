@@ -9,8 +9,11 @@ import com.github.gr.aurora_bookstore.exception.orderException.EmptyCartExceptio
 import com.github.gr.aurora_bookstore.exception.orderException.InsufficientStockException;
 import com.github.gr.aurora_bookstore.exception.orderException.OrderNotFoundException;
 import com.github.gr.aurora_bookstore.exception.response.ErrorResponse;
+import com.github.gr.aurora_bookstore.exception.userException.EmailNotVerifiedException;
+import com.github.gr.aurora_bookstore.exception.userException.GoogleAuthException;
 import com.github.gr.aurora_bookstore.exception.userException.InvalidEmailException;
 import com.github.gr.aurora_bookstore.exception.userException.InvalidPasswordException;
+import com.github.gr.aurora_bookstore.exception.userException.InvalidVerificationTokenException;
 import com.github.gr.aurora_bookstore.exception.userException.UserAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +61,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(org.springframework.security.core.AuthenticationException ex, HttpServletRequest request) {
         return userExceptionHandler.handleAuthenticationException(ex, request.getRequestURI());
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleEmailNotVerified(EmailNotVerifiedException ex, HttpServletRequest request) {
+        return userExceptionHandler.handleEmailNotVerified(ex, request.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException ex, HttpServletRequest request) {
+        return userExceptionHandler.handleInvalidVerificationToken(ex, request.getRequestURI());
+    }
+
+    @ExceptionHandler(GoogleAuthException.class)
+    public ResponseEntity<ErrorResponse> handleGoogleAuth(GoogleAuthException ex, HttpServletRequest request) {
+        return userExceptionHandler.handleGoogleAuth(ex, request.getRequestURI());
     }
 
     // --- Cart Exceptions ---

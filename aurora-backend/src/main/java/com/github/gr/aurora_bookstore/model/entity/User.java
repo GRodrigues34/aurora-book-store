@@ -1,5 +1,6 @@
 package com.github.gr.aurora_bookstore.model.entity;
 
+import com.github.gr.aurora_bookstore.model.enums.AuthProvider;
 import com.github.gr.aurora_bookstore.model.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,21 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private UserRole role;
+
+    @Builder.Default
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = true;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expires_at")
+    private LocalDateTime verificationTokenExpiresAt;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

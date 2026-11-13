@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +40,18 @@ public class UserService implements UserDetailsService {
 
     public UserDetails userDetailsFindByEmail(String email){
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    public Optional<User> findEntityByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public Optional<User> findEntityByVerificationToken(String token) {
+        return userRepository.findByVerificationToken(token);
+    }
+
+    public User saveEntity(User user) {
+        return userRepository.save(user);
     }
 
     public User getEntityById(Long id) {

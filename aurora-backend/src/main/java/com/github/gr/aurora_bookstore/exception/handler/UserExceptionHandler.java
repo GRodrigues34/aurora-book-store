@@ -1,8 +1,11 @@
 package com.github.gr.aurora_bookstore.exception.handler;
 
 import com.github.gr.aurora_bookstore.exception.response.ErrorResponse;
+import com.github.gr.aurora_bookstore.exception.userException.EmailNotVerifiedException;
+import com.github.gr.aurora_bookstore.exception.userException.GoogleAuthException;
 import com.github.gr.aurora_bookstore.exception.userException.InvalidEmailException;
 import com.github.gr.aurora_bookstore.exception.userException.InvalidPasswordException;
+import com.github.gr.aurora_bookstore.exception.userException.InvalidVerificationTokenException;
 import com.github.gr.aurora_bookstore.exception.userException.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +58,38 @@ public class UserExceptionHandler {
                 path
         );
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    public ResponseEntity<ErrorResponse> handleEmailNotVerified(EmailNotVerifiedException ex, String path) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "Email Not Verified",
+                ex.getMessage(),
+                path
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    public ResponseEntity<ErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException ex, String path) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                path
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    public ResponseEntity<ErrorResponse> handleGoogleAuth(GoogleAuthException ex, String path) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                ex.getMessage(),
+                path
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 }
