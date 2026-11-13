@@ -145,6 +145,7 @@ export default function HomePage() {
 
   return (
     <div ref={pageRef} className="overflow-x-clip">
+      <div className="relative">
       {/* Section 1: Obsidian Hero Stage */}
       <section data-surface="dark" className="sticky top-0 z-10 bg-obsidian text-paper border-b border-paper/10">
         <div
@@ -311,6 +312,8 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      </div>
 
       {/* Section 3: Boreal AI Showcase (Deep Purple Pinned Stage) */}
       <section ref={borealSectionRef} data-surface="dark" className="bg-deep-purple text-paper py-20 sm:py-28 border-b border-paper/10">
