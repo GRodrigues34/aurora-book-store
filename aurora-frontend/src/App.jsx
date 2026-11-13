@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
@@ -20,35 +20,44 @@ import OrdersPage from './pages/OrdersPage';
 import PrivateRoute from './components/PrivateRoute';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 
-function AppRoutes() {
+function AppShell() {
   useSmoothScroll();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  return (
+    <div className="min-h-screen flex flex-col bg-paper text-ink">
+      <Header />
+      <CartDrawer />
+
+      <main className={`flex-1 ${isHome ? '' : 'pt-16 lg:pt-20'}`}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/books" element={<BooksPage />} />
+          <Route path="/authors" element={<AuthorsPage />} />
+          <Route path="/publish" element={<PrivateRoute adminOnly={true}><PublishPage /></PrivateRoute>} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
+        </Routes>
+      </main>
+
+      <Footer />
+      <BorealFAB />
+    </div>
+  );
+}
+
+function AppRoutes() {
   return (
     <BrowserRouter>
       <LanguageProvider>
         <AuthProvider>
           <CartProvider>
             <Toaster position="top-right" />
-            <div className="min-h-screen flex flex-col bg-paper text-ink">
-              <Header />
-              <CartDrawer />
-
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/books" element={<BooksPage />} />
-                  <Route path="/authors" element={<AuthorsPage />} />
-                  <Route path="/publish" element={<PrivateRoute adminOnly={true}><PublishPage /></PrivateRoute>} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/verify-email" element={<VerifyEmailPage />} />
-                  <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
-                </Routes>
-              </main>
-
-              <Footer />
-              <BorealFAB />
-            </div>
+            <AppShell />
           </CartProvider>
         </AuthProvider>
       </LanguageProvider>

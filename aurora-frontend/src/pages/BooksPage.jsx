@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getBooks, getCategories, getGenres, getAuthors } from '../services/catalog';
 import BookCard from '../components/ui/BookCard';
@@ -16,6 +16,17 @@ export default function BooksPage() {
   const [selectedAuthor, setSelectedAuthor] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
+
+  const [panelMounted, setPanelMounted] = useState(false);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: true } }));
+    const frame = requestAnimationFrame(() => setPanelMounted(true));
+    return () => {
+      cancelAnimationFrame(frame);
+      window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: false } }));
+    };
+  }, []);
 
   useEffect(() => {
     Promise.all([getBooks(), getCategories(), getGenres(), getAuthors()])
@@ -71,8 +82,40 @@ export default function BooksPage() {
           </p>
         </div>
 
-        {/* Filter Bar */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 flex-wrap bg-slate-50 p-6 rounded-2xl border border-slate-200/60 mb-10">
+        {/* Filter Bar: Search slides in on the left, Filters slide to the right */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 bg-white p-6 rounded-2xl border border-paper-border shadow-aurora-sm mb-10 overflow-hidden">
+          <div
+            className={`flex flex-col w-full lg:w-80 transition-all duration-500 ease-out ${
+              panelMounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+            }`}
+          >
+            <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">
+              Search
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle" size={16} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) {
+                    setSearchParams({ search: val });
+                  } else {
+                    setSearchParams({});
+                  }
+                }}
+                placeholder={t('nav.searchPlaceholder')}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-paper border border-paper-border text-sm text-ink placeholder-ink-subtle focus:outline-none focus:border-aurora-500 focus:ring-2 focus:ring-aurora-500/20"
+              />
+            </div>
+          </div>
+
+          <div
+            className={`flex flex-col sm:flex-row items-center gap-4 flex-wrap lg:justify-end transition-all duration-500 ease-out ${
+              panelMounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+            }`}
+          >
           <div className="flex flex-col w-full sm:w-auto min-w-[180px]">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category</label>
             <select
@@ -126,6 +169,7 @@ export default function BooksPage() {
               </button>
             </div>
           )}
+          </div>
         </div>
 
         {searchQuery && (
