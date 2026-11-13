@@ -21,14 +21,12 @@ public class BookController {
 
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BookReadDTO>> findAll() {
         return ResponseEntity.ok(bookService.findAll());
     }
 
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BookReadDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.findById(id));
     }

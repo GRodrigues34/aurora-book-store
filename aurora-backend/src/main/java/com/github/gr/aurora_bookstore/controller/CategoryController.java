@@ -20,13 +20,11 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<CategoryReadDTO>> findAll() {
         return ResponseEntity.ok(categoryService.findAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CategoryReadDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.findById(id));
     }

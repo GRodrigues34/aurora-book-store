@@ -20,13 +20,11 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<AuthorReadDTO>> findAll() {
         return ResponseEntity.ok(authorService.findAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AuthorReadDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(authorService.findById(id));
     }

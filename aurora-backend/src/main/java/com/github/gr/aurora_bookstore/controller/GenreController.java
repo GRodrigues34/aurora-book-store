@@ -20,13 +20,11 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<GenreReadDTO>> findAll() {
         return ResponseEntity.ok(genreService.findAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<GenreReadDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(genreService.findById(id));
     }
