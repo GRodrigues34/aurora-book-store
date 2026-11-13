@@ -9,6 +9,8 @@ import auroraLogo from '../../assets/aurora-logo.png';
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isDarkSurface, setIsDarkSurface] = useState(true);
+  const [catalogSearchActive, setCatalogSearchActive] = useState(false);
   const { language, toggleLanguage, t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const { totalItems, toggleCart } = useCart();
@@ -17,14 +19,39 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const onScroll = () => {
+    const onCatalogToggle = (e) => {
+      setCatalogSearchActive(Boolean(e.detail?.active));
+    };
+    window.addEventListener('aurora:catalog-search', onCatalogToggle);
+    return () => window.removeEventListener('aurora:catalog-search', onCatalogToggle);
+  }, []);
+
+  useEffect(() => {
+    const updateHeaderState = () => {
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? Math.min(1, Math.max(0, window.scrollY / docHeight)) : 0;
       setScrollProgress(progress);
+
+      const sections = document.querySelectorAll('[data-surface]');
+      let surface = location.pathname === '/' ? 'dark' : 'light';
+      const probeY = 48;
+      for (const sec of sections) {
+        const rect = sec.getBoundingClientRect();
+        if (rect.top <= probeY && rect.bottom > probeY) {
+          surface = sec.getAttribute('data-surface') || surface;
+          break;
+        }
+      }
+      setIsDarkSurface(surface === 'dark');
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
+
+    window.addEventListener('scroll', updateHeaderState, { passive: true });
+    window.addEventListener('resize', updateHeaderState, { passive: true });
+    updateHeaderState();
+    return () => {
+      window.removeEventListener('scroll', updateHeaderState);
+      window.removeEventListener('resize', updateHeaderState);
+    };
   }, [location.pathname]);
 
   const handleSearchSubmit = (e) => {
@@ -45,27 +72,56 @@ export default function Header() {
 
   const isActive = (path) => location.pathname === path;
 
+  const headerBg = isDarkSurface
+    ? 'bg-obsidian/80 border-paper/10 text-paper'
+    : 'bg-paper/85 border-paper-border text-ink';
+
+  const navLinkClass = (active) =>
+    isDarkSurface
+      ? active
+        ? 'text-paper bg-white/10'
+        : 'text-paper/70 hover:text-paper hover:bg-white/5'
+      : active
+        ? 'text-aurora-800 bg-aurora-50'
+        : 'text-ink-muted hover:text-ink hover:bg-paper-subtle';
+
   return (
     <>
-      <header className="sticky top-0 z-50 bg-obsidian/92 backdrop-blur-md border-b border-paper/10 text-paper">
+      <header className={`sticky top-0 z-50 backdrop-blur-md border-b transition-colors duration-300 ${headerBg}`}>
         <div className="section-container">
           <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
             <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
               <img src={auroraLogo} alt="Aurora Bookstore" className="h-9 lg:h-10 w-auto object-contain" />
-              <span className="font-sans text-lg font-semibold tracking-tight text-paper">
-                Aurora <span className="serif-italic text-aurora-300">Bookstore</span>
+              <span className="font-sans text-lg font-semibold tracking-tight">
+                Aurora <span className={`serif-italic ${isDarkSurface ? 'text-aurora-300' : 'text-aurora-700'}`}>Bookstore</span>
               </span>
             </Link>
 
-            <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-sm mx-4">
+            <form
+              onSubmit={handleSearchSubmit}
+              className={`hidden md:flex flex-1 max-w-sm mx-4 transition-all duration-300 ease-out ${
+                catalogSearchActive
+                  ? 'opacity-0 translate-y-3 scale-95 pointer-events-none'
+                  : 'opacity-100 translate-y-0 scale-100'
+              }`}
+            >
               <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-paper/40" size={15} />
+                <Search
+                  className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${
+                    isDarkSurface ? 'text-paper/45' : 'text-ink-subtle'
+                  }`}
+                  size={15}
+                />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('nav.searchPlaceholder')}
-                  className="w-full pl-9 pr-4 py-2 rounded-full bg-white/5 border border-paper/15 text-xs text-paper placeholder-paper/40 transition-colors focus:outline-none focus:bg-white/10 focus:border-gold/60"
+                  className={`w-full pl-9 pr-4 py-2 rounded-full border text-xs transition-colors focus:outline-none ${
+                    isDarkSurface
+                      ? 'bg-white/5 border-paper/15 text-paper placeholder-paper/45 focus:bg-white/10 focus:border-gold/60'
+                      : 'bg-white border-paper-border text-ink placeholder-ink-subtle focus:border-aurora-500'
+                  }`}
                 />
               </div>
             </form>
@@ -75,11 +131,7 @@ export default function Header() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-3 py-2 text-xs font-medium tracking-wide rounded-full transition-colors duration-200 ${
-                    isActive(link.to)
-                      ? 'text-paper bg-white/10'
-                      : 'text-paper/65 hover:text-paper hover:bg-white/5'
-                  }`}
+                  className={`px-3 py-2 text-xs font-medium tracking-wide rounded-full transition-colors duration-200 ${navLinkClass(isActive(link.to))}`}
                 >
                   {link.label}
                 </Link>
@@ -89,20 +141,26 @@ export default function Header() {
                 <>
                   <Link
                     to="/orders"
-                    className={`px-3 py-2 text-xs font-medium tracking-wide rounded-full transition-colors duration-200 ${
-                      isActive('/orders')
-                        ? 'text-paper bg-white/10'
-                        : 'text-paper/65 hover:text-paper hover:bg-white/5'
-                    }`}
+                    className={`px-3 py-2 text-xs font-medium tracking-wide rounded-full transition-colors duration-200 ${navLinkClass(isActive('/orders'))}`}
                   >
                     {t('orders.title')}
                   </Link>
-                  <span className="px-3 py-1.5 text-[11px] font-mono text-paper/80 bg-white/5 border border-paper/15 rounded-full max-w-[130px] truncate ml-1">
+                  <span
+                    className={`px-3 py-1.5 text-[11px] font-mono rounded-full max-w-[130px] truncate ml-1 border ${
+                      isDarkSurface
+                        ? 'text-paper/80 bg-white/5 border-paper/15'
+                        : 'text-ink-muted bg-paper-subtle border-paper-border'
+                    }`}
+                  >
                     {user?.email?.split('@')[0]}
                   </span>
                   <button
                     onClick={logout}
-                    className="px-3 py-2 text-xs font-medium text-red-300 hover:text-red-200 hover:bg-red-500/10 rounded-full transition-colors"
+                    className={`px-3 py-2 text-xs font-medium rounded-full transition-colors ${
+                      isDarkSurface
+                        ? 'text-red-300 hover:text-red-200 hover:bg-red-500/10'
+                        : 'text-red-700 hover:text-red-900 hover:bg-red-50'
+                    }`}
                   >
                     {t('auth.logoutBtn')}
                   </button>
@@ -118,7 +176,11 @@ export default function Header() {
 
               <button
                 onClick={toggleCart}
-                className="relative flex items-center justify-center p-2 text-paper/75 hover:text-paper hover:bg-white/5 rounded-full transition-colors ml-1"
+                className={`relative flex items-center justify-center p-2 rounded-full transition-colors ml-1 ${
+                  isDarkSurface
+                    ? 'text-paper/80 hover:text-paper hover:bg-white/5'
+                    : 'text-ink-muted hover:text-ink hover:bg-paper-subtle'
+                }`}
                 aria-label="Open shopping cart"
               >
                 <ShoppingBag size={18} />
@@ -131,7 +193,11 @@ export default function Header() {
 
               <button
                 onClick={toggleLanguage}
-                className="ml-1 flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-paper/65 hover:text-paper rounded-full hover:bg-white/5 transition-colors"
+                className={`ml-1 flex items-center gap-1 px-2.5 py-2 text-xs font-medium rounded-full transition-colors ${
+                  isDarkSurface
+                    ? 'text-paper/70 hover:text-paper hover:bg-white/5'
+                    : 'text-ink-muted hover:text-ink hover:bg-paper-subtle'
+                }`}
                 aria-label="Toggle language"
               >
                 <Globe size={14} />
@@ -142,7 +208,9 @@ export default function Header() {
             <div className="flex items-center gap-2 lg:hidden">
               <button
                 onClick={toggleCart}
-                className="relative flex items-center justify-center p-2 text-paper/80 hover:text-paper rounded-full transition-colors"
+                className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${
+                  isDarkSurface ? 'text-paper/80 hover:text-paper' : 'text-ink-muted hover:text-ink'
+                }`}
                 aria-label="Open shopping cart"
               >
                 <ShoppingBag size={19} />
@@ -155,7 +223,9 @@ export default function Header() {
 
               <button
                 onClick={toggleLanguage}
-                className="flex items-center gap-1 px-2 py-2 text-paper/75 hover:text-paper rounded-full transition-colors"
+                className={`flex items-center gap-1 px-2 py-2 rounded-full transition-colors ${
+                  isDarkSurface ? 'text-paper/80 hover:text-paper' : 'text-ink-muted hover:text-ink'
+                }`}
                 aria-label="Toggle language"
               >
                 <Globe size={16} />
@@ -164,7 +234,9 @@ export default function Header() {
 
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="p-2 text-paper/80 hover:text-paper rounded-full transition-colors"
+                className={`p-2 rounded-full transition-colors ${
+                  isDarkSurface ? 'text-paper/80 hover:text-paper' : 'text-ink-muted hover:text-ink'
+                }`}
                 aria-label="Open menu"
               >
                 <Menu size={22} />
@@ -173,7 +245,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* 1px Scroll Progress Indicator */}
+        {/* 2px Scroll Progress Indicator */}
         <div
           className="h-[2px] bg-gradient-to-r from-aurora-500 via-gold to-aurora-400 origin-left transition-transform duration-75"
           style={{ transform: `scaleX(${scrollProgress})` }}
@@ -183,7 +255,7 @@ export default function Header() {
 
       {/* Fullscreen Editorial Mobile Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-obsidian text-paper flex flex-col justify-between p-6 sm:p-10 lg:hidden">
+        <div className="fixed inset-0 z-50 bg-obsidian text-paper flex flex-col justify-between p-6 sm:p-10 lg:hidden animate-fade-in">
           <div className="flex items-center justify-between border-b border-paper/15 pb-5">
             <span className="font-sans text-lg font-semibold tracking-tight">
               Aurora <span className="serif-italic text-aurora-300">Bookstore</span>

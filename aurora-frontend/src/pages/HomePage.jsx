@@ -43,6 +43,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedGenre, setSelectedGenre] = useState(null);
+  const [catalogInView, setCatalogInView] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,15 +97,46 @@ export default function HomePage() {
           ScrollTrigger.create({
             trigger: borealSectionRef.current,
             start: 'top top+=96',
-            end: 'bottom bottom-=96',
+            end: () => {
+              const secH = borealSectionRef.current?.offsetHeight || 600;
+              const pinH = borealPinRef.current?.offsetHeight || 220;
+              return `+=${Math.max(120, secH - pinH - 180)}`;
+            },
             pin: borealPinRef.current,
             pinSpacing: false,
           });
         }
       });
+
+      if (catalogRef.current) {
+        ScrollTrigger.create({
+          trigger: catalogRef.current,
+          start: 'top top+=120',
+          end: 'bottom top+=120',
+          onEnter: () => {
+            setCatalogInView(true);
+            window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: true } }));
+          },
+          onLeave: () => {
+            setCatalogInView(false);
+            window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: false } }));
+          },
+          onEnterBack: () => {
+            setCatalogInView(true);
+            window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: true } }));
+          },
+          onLeaveBack: () => {
+            setCatalogInView(false);
+            window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: false } }));
+          },
+        });
+      }
     }, pageRef);
 
-    return () => ctx.revert();
+    return () => {
+      window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: false } }));
+      ctx.revert();
+    };
   }, []);
 
   const filteredBooks = useMemo(() => {
@@ -131,7 +163,7 @@ export default function HomePage() {
   return (
     <div ref={pageRef} className="overflow-x-clip">
       {/* Section 1: Obsidian Hero Stage */}
-      <section className="relative bg-obsidian text-paper border-b border-paper/10">
+      <section data-surface="dark" className="relative bg-obsidian text-paper border-b border-paper/10">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -179,7 +211,7 @@ export default function HomePage() {
       </section>
 
       {/* Section 2: Immediate Books Catalog (Warm Ivory) */}
-      <section ref={catalogRef} id="catalog" className="bg-paper text-ink py-16 sm:py-24 border-b border-paper-border">
+      <section ref={catalogRef} id="catalog" data-surface="light" className="bg-paper text-ink py-16 sm:py-24 border-b border-paper-border">
         <div className="section-container">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 mb-10 border-b border-paper-border">
             <div>
@@ -191,8 +223,25 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Filters */}
+            {/* Filters + Jumping Search Bar */}
             <div className="flex flex-wrap items-center gap-3">
+              <div
+                className={`relative transition-all duration-300 ease-out ${
+                  catalogInView
+                    ? 'opacity-100 translate-y-0 scale-100'
+                    : 'opacity-70 -translate-y-2 scale-95'
+                }`}
+              >
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle" size={14} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('nav.searchPlaceholder')}
+                  className="pl-9 pr-4 py-2.5 rounded-full bg-white border border-paper-border text-xs text-ink placeholder-ink-subtle focus:outline-none focus:border-aurora-600 w-52 sm:w-64"
+                />
+              </div>
+
               <select
                 value={selectedCategory || ''}
                 onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
@@ -281,7 +330,7 @@ export default function HomePage() {
       </section>
 
       {/* Section 3: Boreal AI Showcase (Deep Purple Pinned Stage) */}
-      <section ref={borealSectionRef} className="bg-deep-purple text-paper py-20 sm:py-28 border-b border-paper/10">
+      <section ref={borealSectionRef} data-surface="dark" className="bg-deep-purple text-paper py-20 sm:py-28 border-b border-paper/10 overflow-hidden">
         <div className="section-container">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
             <div ref={borealPinRef} className="md:col-span-5 space-y-6">
@@ -318,7 +367,7 @@ export default function HomePage() {
       </section>
 
       {/* Section 4: Editorial Pillars (Warm Ivory) */}
-      <section className="bg-paper text-ink py-20 sm:py-28">
+      <section data-surface="light" className="bg-paper text-ink py-20 sm:py-28">
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-4 space-y-5">
