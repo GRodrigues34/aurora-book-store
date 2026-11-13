@@ -87,6 +87,18 @@ export function useScrollReveal() {
       }
     );
 
+    const revealVisibleElements = () => {
+      document
+        .querySelectorAll('[data-reveal]:not(.is-inview), [data-reveal-words]:not(.is-inview)')
+        .forEach((el) => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight * 0.95 && rect.bottom > 0) {
+            el.classList.add('is-inview');
+            observer.unobserve(el);
+          }
+        });
+    };
+
     const bindElements = () => {
       document.querySelectorAll(WORD_HEADING_SELECTOR).forEach((heading) => {
         splitHeadingWords(heading);
@@ -104,7 +116,7 @@ export function useScrollReveal() {
         el.dataset.revealBound = 'true';
 
         const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.92) {
+        if (rect.top < window.innerHeight * 0.95) {
           el.classList.add('is-inview');
           return;
         }
@@ -116,15 +128,23 @@ export function useScrollReveal() {
         el.dataset.revealWordsBound = 'true';
 
         const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.92) {
+        if (rect.top < window.innerHeight * 0.95) {
           el.classList.add('is-inview');
           return;
         }
         observer.observe(el);
       });
+
+      revealVisibleElements();
     };
 
     const rafId = window.requestAnimationFrame(bindElements);
+    const settleTimer = window.setTimeout(() => {
+      bindElements();
+      revealVisibleElements();
+    }, 120);
+
+    window.addEventListener('scroll', revealVisibleElements, { passive: true });
 
     const mutationObserver = new MutationObserver(() => {
       bindElements();
@@ -136,6 +156,8 @@ export function useScrollReveal() {
 
     return () => {
       window.cancelAnimationFrame(rafId);
+      window.clearTimeout(settleTimer);
+      window.removeEventListener('scroll', revealVisibleElements);
       mutationObserver.disconnect();
       observer.disconnect();
     };
