@@ -85,7 +85,7 @@ export default function BooksPage() {
         {/* Filter Bar: Search slides in on the left, Filters slide to the right */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 bg-white p-6 rounded-2xl border border-paper-border shadow-aurora-sm mb-10 overflow-hidden">
           <div
-            className={`flex flex-col w-full lg:w-80 transition-all duration-500 ease-out ${
+            className={`flex flex-col w-full lg:flex-1 transition-all duration-500 ease-out ${
               panelMounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
             }`}
           >
