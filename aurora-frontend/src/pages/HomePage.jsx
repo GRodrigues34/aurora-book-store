@@ -44,6 +44,7 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [catalogInView, setCatalogInView] = useState(false);
+  const [showAllBooks, setShowAllBooks] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -291,11 +292,26 @@ export default function HomePage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {filteredBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {(showAllBooks ? filteredBooks : filteredBooks.slice(0, 10)).map((book) => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+
+              {filteredBooks.length > 10 && !showAllBooks && (
+                <div className="mt-10 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllBooks(true)}
+                    className="px-7 py-3 rounded-full bg-aurora-700 hover:bg-aurora-600 text-paper text-sm font-semibold inline-flex items-center gap-2 transition-colors shadow-sm"
+                  >
+                    <span>Show More</span>
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
