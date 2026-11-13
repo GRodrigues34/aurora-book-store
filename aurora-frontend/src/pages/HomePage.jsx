@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getBooks, getCategories, getGenres } from '../services/catalog';
 import BookCard from '../components/ui/BookCard';
+import borealAiBg from '../assets/boreal-ai-bg.jpeg';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,17 +14,17 @@ const BOREAL_PROMPTS = [
   {
     code: '01',
     prompt: 'Suggest a philosophical dystopia similar to Brave New World.',
-    reply: 'Boreal matches vector context from ChromaDB: 1984, Fahrenheit 451, and Neuromancer.',
+    reply: 'Boreal suggests 1984, Fahrenheit 451, and Neuromancer based on shared themes and mood.',
   },
   {
     code: '02',
     prompt: 'I need a thoughtful literary gift under R$ 70.',
-    reply: 'Curated in-stock editions filtered by price, genre, and reader mood.',
+    reply: 'Curated in-stock editions matched to your budget, genre, and reading mood.',
   },
   {
     code: '03',
     prompt: 'Which classic pairs best with rainy-evening reading?',
-    reply: 'Instant semantic recommendations grounded in our live catalog.',
+    reply: 'Personalized book pairings chosen from our live bookstore collection.',
   },
 ];
 
@@ -104,7 +105,58 @@ export default function HomePage() {
       }
     }, pageRef);
 
+    // rAF-gated Hero -> Catalog curtain exit choreography (matches portfolio Layout.astro)
+    let scrollTicking = false;
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const smoothstep = (t) => t * t * (3 - 2 * t);
+
+    const updateHeroCurtain = () => {
+      scrollTicking = false;
+      const cat = catalogRef.current;
+      const root = pageRef.current;
+      if (!cat || !root) return;
+
+      const vh = window.innerHeight || 1;
+      const riseRaw = clamp(1 - cat.getBoundingClientRect().top / vh, 0, 1);
+
+      const shade = root.querySelector('#hero-exit-shade');
+      if (shade) {
+        shade.style.opacity = (smoothstep(riseRaw) * 0.82).toFixed(3);
+      }
+
+      root.querySelectorAll('[data-hero-el]').forEach((el, idx) => {
+        const order = Number(el.getAttribute('data-hero-el') || idx);
+        const stagger = order * 0.065;
+        const outRaw = clamp((riseRaw - stagger) / Math.max(0.82 - stagger, 0.25), 0, 1);
+        const out = smoothstep(outRaw);
+
+        if (out <= 0.001) {
+          el.style.opacity = '';
+          el.style.transform = '';
+        } else {
+          const driftY = -out * (36 + order * 10);
+          const sc = 1 - out * 0.08;
+          const op = clamp(1 - out * 1.08, 0, 1);
+          el.style.opacity = op.toFixed(3);
+          el.style.transform = `translate3d(0, ${driftY.toFixed(1)}px, 0) scale(${sc.toFixed(4)})`;
+        }
+      });
+    };
+
+    const onScroll = () => {
+      if (!scrollTicking) {
+        scrollTicking = true;
+        window.requestAnimationFrame(updateHeroCurtain);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateHeroCurtain();
+
     return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
       window.dispatchEvent(new CustomEvent('aurora:catalog-search', { detail: { active: false } }));
       ctx.revert();
     };
@@ -133,31 +185,46 @@ export default function HomePage() {
 
   return (
     <div ref={pageRef} className="overflow-x-clip">
-      <div className="relative">
-      {/* Section 1: Obsidian Hero Stage */}
-      <section data-surface="dark" className="sticky top-0 z-10 bg-obsidian text-paper border-b border-paper/10">
+      {/* Section 1: Editorial Bookstore Hero Stage */}
+      <section data-surface="dark" className="sticky top-0 z-10 min-h-[84vh] flex items-center bg-obsidian text-paper border-b border-paper/10 overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=2000&q=80"
+          alt="Warm atmospheric bookstore shelves"
+          className="pointer-events-none absolute inset-0 w-full h-full object-cover object-center scale-105"
+        />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background: 'radial-gradient(55% 50% at 75% 35%, rgba(107, 33, 168, 0.22), transparent 70%)',
+            background:
+              'linear-gradient(90deg, rgba(12, 10, 15, 0.92) 0%, rgba(12, 10, 15, 0.72) 48%, rgba(12, 10, 15, 0.34) 100%)',
           }}
           aria-hidden="true"
         />
 
-        <div className="section-container relative py-20 sm:py-28 lg:py-32">
-          <div className="max-w-5xl space-y-8">
-            <h1 className="hero-reveal font-sans font-medium text-paper text-[clamp(2.75rem,6.4vw,5.75rem)] leading-[0.94] tracking-[-0.045em]">
+        <div
+          id="hero-exit-shade"
+          className="pointer-events-none absolute inset-0 bg-obsidian opacity-0"
+          aria-hidden="true"
+        />
+
+        <div className="section-container relative w-full py-24 sm:py-28 lg:py-32">
+          <div className="max-w-2xl space-y-6">
+            <p data-hero-el="0" className="hero-reveal font-mono text-[11px] uppercase tracking-[0.26em] text-gold/90">
+              Curated Literature · AI Discovery
+            </p>
+
+            <h1 data-hero-el="1" className="hero-reveal font-serif font-normal text-paper text-[clamp(3rem,6vw,5.25rem)] leading-[1.02] tracking-[-0.02em]">
               {t('home.heroTitle')}
             </h1>
 
-            <p className="hero-reveal text-base sm:text-lg text-paper/70 leading-relaxed max-w-[60ch]">
+            <p data-hero-el="2" className="hero-reveal font-serif text-lg sm:text-xl text-paper/85 leading-relaxed max-w-[46ch]">
               {t('home.heroSubtitle')}
             </p>
 
             {/* Instant Search + CTA */}
-            <div className="hero-reveal flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 max-w-2xl">
+            <div data-hero-el="3" className="hero-reveal flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 max-w-xl">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-paper/45" size={17} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-paper/55" size={17} />
                 <input
                   type="text"
                   value={searchQuery}
@@ -166,19 +233,24 @@ export default function HomePage() {
                     if (e.key === 'Enter') scrollToCatalog();
                   }}
                   placeholder={t('nav.searchPlaceholder')}
-                  className="w-full pl-11 pr-4 py-3.5 rounded-full bg-white/5 border border-paper/20 text-sm text-paper placeholder-paper/45 focus:outline-none focus:bg-white/10 focus:border-gold"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-md bg-obsidian/70 backdrop-blur-sm border border-paper/25 text-sm text-paper placeholder-paper/50 focus:outline-none focus:bg-obsidian/90 focus:border-gold"
                 />
               </div>
               <button
                 type="button"
                 onClick={scrollToCatalog}
-                className="px-7 py-3.5 rounded-full bg-aurora-700 hover:bg-aurora-600 text-paper text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors"
+                className="px-7 py-3.5 rounded-md bg-aurora-700 hover:bg-aurora-600 text-paper text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors shadow-lg"
               >
                 <span>{t('home.heroCta')}</span>
                 <ArrowRight size={16} />
               </button>
             </div>
           </div>
+        </div>
+
+        <div data-hero-el="4" className="scroll-cue hidden sm:flex" aria-hidden="true">
+          <span>Scroll</span>
+          <i />
         </div>
       </section>
 
@@ -187,7 +259,7 @@ export default function HomePage() {
         <div className="section-container">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 mb-10 border-b border-paper-border">
             <div>
-              <h2 className="font-sans text-3xl sm:text-5xl font-medium tracking-[-0.035em] text-ink">
+              <h2 className="font-serif font-normal text-4xl sm:text-5xl tracking-[-0.02em] text-ink">
                 {t('books.title')}
               </h2>
               <p className="serif-italic text-xl text-ink-muted mt-1">
@@ -210,7 +282,7 @@ export default function HomePage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('nav.searchPlaceholder')}
-                  className="pl-9 pr-4 py-2.5 rounded-full bg-white border border-paper-border text-xs text-ink placeholder-ink-subtle focus:outline-none focus:border-aurora-600 w-52 sm:w-64"
+                  className="pl-10 pr-4 py-3 rounded-full bg-white border border-paper-border text-sm text-ink placeholder-ink-subtle focus:outline-none focus:border-aurora-600 w-full sm:w-[28rem] lg:w-[36rem]"
                 />
               </div>
 
@@ -316,18 +388,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      </div>
-
-      {/* Section 3: Boreal AI Showcase (Deep Purple Pinned Stage) */}
-      <section ref={borealSectionRef} data-surface="dark" className="bg-deep-purple text-paper py-20 sm:py-28 border-b border-paper/10">
-        <div className="section-container">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
-            <div ref={borealPinRef} className="md:col-span-5 md:sticky md:top-28 space-y-6">
+      {/* Section 3: Boreal AI Showcase (Deep Purple Editorial Stage) */}
+      <section ref={borealSectionRef} data-surface="dark" className="relative z-20 bg-deep-purple text-paper py-20 sm:py-28 border-b border-paper/10">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <img
+            src={borealAiBg}
+            alt="Boreal AI neural light portrait"
+            className="w-full h-full object-cover object-center opacity-90"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(36, 18, 58, 0.38) 0%, rgba(36, 18, 58, 0.22) 50%, rgba(24, 12, 40, 0.30) 100%)',
+            }}
+          />
+        </div>
+        <div className="section-container relative">
+          <div className="ml-auto max-w-xl space-y-8">
+            <div ref={borealPinRef} className="space-y-4">
               <div className="inline-flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest">
                 <Sparkles size={14} />
                 <span>Boreal AI</span>
               </div>
-              <h2 className="font-sans text-3xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.02] text-paper">
+              <h2 className="font-serif font-normal text-5xl sm:text-6xl lg:text-7xl tracking-[-0.02em] leading-[1.0] text-paper">
                 {t('home.whyAi')}
               </h2>
               <p className="text-base text-paper/70 leading-relaxed max-w-[44ch]">
@@ -335,17 +419,19 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="md:col-span-7 space-y-6">
-              {BOREAL_PROMPTS.map((item) => (
+            <div className="space-y-3">
+              {BOREAL_PROMPTS.map((item, idx) => (
                 <div
                   key={item.code}
-                  className="rounded-2xl border border-paper/15 bg-white/5 p-7 sm:p-9 space-y-4"
+                  data-reveal="right"
+                  style={{ '--reveal-delay': `${idx * 90}ms` }}
+                  className="rounded-xl border border-paper/15 bg-white/5 p-4 sm:p-5 space-y-2.5"
                 >
-                  <span className="font-mono text-xs text-gold tabular-nums">{item.code}</span>
-                  <p className="serif-italic text-2xl sm:text-3xl text-paper leading-snug">
+                  <span className="font-mono text-[11px] text-gold tabular-nums">{item.code}</span>
+                  <p className="serif-italic text-lg sm:text-xl text-paper leading-snug">
                     “{item.prompt}”
                   </p>
-                  <p className="text-sm text-paper/65 leading-relaxed pt-2 border-t border-paper/10">
+                  <p className="text-xs text-paper/65 leading-relaxed pt-2 border-t border-paper/10">
                     {item.reply}
                   </p>
                 </div>
@@ -356,51 +442,57 @@ export default function HomePage() {
       </section>
 
       {/* Section 4: Editorial Pillars (Warm Ivory) */}
-      <section data-surface="light" className="bg-paper text-ink py-20 sm:py-28">
+      <section data-surface="light" className="relative z-20 bg-paper text-ink py-20 sm:py-28">
         <div className="section-container">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-4 space-y-5">
-              <h2 className="font-sans text-3xl sm:text-5xl font-medium tracking-[-0.035em] text-ink leading-tight">
-                {t('home.whyTitle')}
-              </h2>
-              <Link to="/authors" className="btn-secondary inline-flex">
+          <div data-reveal="up" className="text-center max-w-xl mx-auto mb-14 space-y-4">
+            <h2 className="font-serif font-normal text-4xl sm:text-5xl tracking-[-0.02em] text-ink leading-tight">
+              {t('home.whyTitle')}
+            </h2>
+            <div>
+              <Link to="/authors" className="line-link text-sm font-medium text-ink">
                 <span>{t('authors.title')}</span>
                 <ArrowRight size={15} />
               </Link>
             </div>
+          </div>
 
-            <div className="lg:col-span-8 pillars-list divide-y divide-paper-border border-t border-b border-paper-border">
-              <div data-reveal="right" className="pillar-row py-8 flex items-start gap-6">
-                <span className="font-mono text-xs text-aurora-700 pt-1 tabular-nums">01</span>
+          <div className="pillars-list grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-paper-border">
+            <div data-reveal="scale" style={{ '--reveal-delay': '0.06s' }} className="pillar-row flex flex-col items-start gap-4">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-aurora-700 tabular-nums">01</span>
                 <div className="w-10 h-10 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
                   <BookOpen className="text-aurora-700" size={18} />
                 </div>
-                <div>
-                  <h3 className="text-xl font-medium text-ink mb-1.5">{t('home.whyCurated')}</h3>
-                  <p className="text-sm text-ink-muted leading-relaxed max-w-[58ch]">{t('home.whyCuratedDesc')}</p>
-                </div>
               </div>
+              <div>
+                <h3 className="text-xl font-medium text-ink mb-1.5">{t('home.whyCurated')}</h3>
+                <p className="text-sm text-ink-muted leading-relaxed">{t('home.whyCuratedDesc')}</p>
+              </div>
+            </div>
 
-              <div data-reveal="right" className="pillar-row py-8 flex items-start gap-6">
-                <span className="font-mono text-xs text-aurora-700 pt-1 tabular-nums">02</span>
+            <div data-reveal="scale" style={{ '--reveal-delay': '0.14s' }} className="pillar-row flex flex-col items-start gap-4">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-aurora-700 tabular-nums">02</span>
                 <div className="w-10 h-10 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
                   <Users className="text-emerald-700" size={18} />
                 </div>
-                <div>
-                  <h3 className="text-xl font-medium text-ink mb-1.5">{t('home.whyCommunity')}</h3>
-                  <p className="text-sm text-ink-muted leading-relaxed max-w-[58ch]">{t('home.whyCommunityDesc')}</p>
-                </div>
               </div>
+              <div>
+                <h3 className="text-xl font-medium text-ink mb-1.5">{t('home.whyCommunity')}</h3>
+                <p className="text-sm text-ink-muted leading-relaxed">{t('home.whyCommunityDesc')}</p>
+              </div>
+            </div>
 
-              <div data-reveal="right" className="pillar-row py-8 flex items-start gap-6">
-                <span className="font-mono text-xs text-aurora-700 pt-1 tabular-nums">03</span>
+            <div data-reveal="scale" style={{ '--reveal-delay': '0.22s' }} className="pillar-row flex flex-col items-start gap-4">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-aurora-700 tabular-nums">03</span>
                 <div className="w-10 h-10 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
                   <Sparkles className="text-aurora-700" size={18} />
                 </div>
-                <div>
-                  <h3 className="text-xl font-medium text-ink mb-1.5">{t('home.whyAi')}</h3>
-                  <p className="text-sm text-ink-muted leading-relaxed max-w-[58ch]">{t('home.whyAiDesc')}</p>
-                </div>
+              </div>
+              <div>
+                <h3 className="text-xl font-medium text-ink mb-1.5">{t('home.whyAi')}</h3>
+                <p className="text-sm text-ink-muted leading-relaxed">{t('home.whyAiDesc')}</p>
               </div>
             </div>
           </div>

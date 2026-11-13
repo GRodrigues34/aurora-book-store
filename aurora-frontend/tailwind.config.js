@@ -44,7 +44,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['General Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Public Sans', 'system-ui', '-apple-system', 'sans-serif'],
         serif: ['Instrument Serif', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },

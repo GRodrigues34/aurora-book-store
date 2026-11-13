@@ -76,14 +76,17 @@ export function useScrollReveal() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('is-inview');
-          observer.unobserve(entry.target);
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-inview');
+          } else if (entry.boundingClientRect.top > window.innerHeight) {
+            // Only reset when scrolled below the viewport so elements never vanish mid-read at the top
+            entry.target.classList.remove('is-inview');
+          }
         });
       },
       {
-        threshold: 0.08,
-        rootMargin: '0px 0px -36px 0px',
+        threshold: 0.12,
+        rootMargin: '0px 0px -6% 0px',
       }
     );
 

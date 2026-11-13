@@ -90,7 +90,7 @@ export default function Header() {
         <div className="section-container">
           <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
             <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-              <img src={auroraLogo} alt="Aurora Bookstore" className="h-9 lg:h-10 w-auto object-contain" />
+              <img src={auroraLogo} alt="Aurora Bookstore" className="h-12 lg:h-14 w-auto object-contain" />
               <span className="font-sans text-lg font-semibold tracking-tight">
                 Aurora <span className={`serif-italic ${isDarkSurface ? 'text-aurora-300' : 'text-aurora-700'}`}>Bookstore</span>
               </span>
