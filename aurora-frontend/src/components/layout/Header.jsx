@@ -39,7 +39,6 @@ export default function Header() {
         const rect = sec.getBoundingClientRect();
         if (rect.top <= probeY && rect.bottom > probeY) {
           surface = sec.getAttribute('data-surface') || surface;
-          break;
         }
       }
       setIsDarkSurface(surface === 'dark');
