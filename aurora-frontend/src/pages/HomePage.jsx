@@ -78,19 +78,6 @@ export default function HomePage() {
         ease: 'power3.out',
       });
 
-      gsap.from('.pillar-row', {
-        y: 24,
-        opacity: 0,
-        duration: 0.65,
-        stagger: 0.12,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.pillars-list',
-          start: 'top 80%',
-          once: true,
-        },
-      });
-
       if (catalogRef.current) {
         ScrollTrigger.create({
           trigger: catalogRef.current,
@@ -367,7 +354,7 @@ export default function HomePage() {
             </div>
 
             <div className="lg:col-span-8 pillars-list divide-y divide-paper-border border-t border-b border-paper-border">
-              <div className="pillar-row py-8 flex items-start gap-6">
+              <div data-reveal="right" className="pillar-row py-8 flex items-start gap-6">
                 <span className="font-mono text-xs text-aurora-700 pt-1 tabular-nums">01</span>
                 <div className="w-10 h-10 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
                   <BookOpen className="text-aurora-700" size={18} />
@@ -378,7 +365,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="pillar-row py-8 flex items-start gap-6">
+              <div data-reveal="right" className="pillar-row py-8 flex items-start gap-6">
                 <span className="font-mono text-xs text-aurora-700 pt-1 tabular-nums">02</span>
                 <div className="w-10 h-10 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
                   <Users className="text-emerald-700" size={18} />
@@ -389,7 +376,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="pillar-row py-8 flex items-start gap-6">
+              <div data-reveal="right" className="pillar-row py-8 flex items-start gap-6">
                 <span className="font-mono text-xs text-aurora-700 pt-1 tabular-nums">03</span>
                 <div className="w-10 h-10 rounded-xl bg-white border border-paper-border flex items-center justify-center flex-shrink-0">
                   <Sparkles className="text-aurora-700" size={18} />
