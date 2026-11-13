@@ -91,23 +91,6 @@ export default function HomePage() {
         },
       });
 
-      const mm = gsap.matchMedia();
-      mm.add('(min-width: 768px)', () => {
-        if (borealSectionRef.current && borealPinRef.current) {
-          ScrollTrigger.create({
-            trigger: borealSectionRef.current,
-            start: 'top top+=96',
-            end: () => {
-              const secH = borealSectionRef.current?.offsetHeight || 600;
-              const pinH = borealPinRef.current?.offsetHeight || 220;
-              return `+=${Math.max(120, secH - pinH - 180)}`;
-            },
-            pin: borealPinRef.current,
-            pinSpacing: false,
-          });
-        }
-      });
-
       if (catalogRef.current) {
         ScrollTrigger.create({
           trigger: catalogRef.current,
@@ -330,10 +313,10 @@ export default function HomePage() {
       </section>
 
       {/* Section 3: Boreal AI Showcase (Deep Purple Pinned Stage) */}
-      <section ref={borealSectionRef} data-surface="dark" className="bg-deep-purple text-paper py-20 sm:py-28 border-b border-paper/10 overflow-hidden">
+      <section ref={borealSectionRef} data-surface="dark" className="bg-deep-purple text-paper py-20 sm:py-28 border-b border-paper/10">
         <div className="section-container">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
-            <div ref={borealPinRef} className="md:col-span-5 space-y-6">
+            <div ref={borealPinRef} className="md:col-span-5 md:sticky md:top-28 space-y-6">
               <div className="inline-flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest">
                 <Sparkles size={14} />
                 <span>Boreal AI</span>
