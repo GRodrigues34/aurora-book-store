@@ -73,8 +73,8 @@ export default function Header() {
   const isActive = (path) => location.pathname === path;
 
   const headerBg = isDarkSurface
-    ? 'bg-obsidian/80 border-paper/10 text-paper'
-    : 'bg-paper/85 border-paper-border text-ink';
+    ? 'bg-transparent border-paper/10 text-paper'
+    : 'bg-transparent border-paper-border text-ink';
 
   const navLinkClass = (active) =>
     isDarkSurface
